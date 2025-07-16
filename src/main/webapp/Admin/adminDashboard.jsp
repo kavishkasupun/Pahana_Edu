@@ -9,11 +9,12 @@
     <title>Product Admin - Dashboard HTML Template</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
     <!-- https://fonts.google.com/specimen/Roboto -->
-    <link rel="stylesheet" href="../css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- https://fontawesome.com/ -->
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
     <!-- https://getbootstrap.com/ -->
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--
     Product Admin CSS Template
     https://templatemo.com/tm-524-product-admin
@@ -57,11 +58,20 @@
                             </div>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="products.jsp">
-                                <i class="fas fa-shopping-cart"></i>
-                                Products
-                            </a>
-                        </li>
+						    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+						        aria-haspopup="true" aria-expanded="false">
+						        <i class="fas fa-shopping-cart"></i>
+						      
+						            Products 
+						        
+						    </a>
+						</li>
+						<li class="nav-item">
+					    <a class="nav-link" href="${pageContext.request.contextPath}/CategoryServlet?action=list">
+					        <i class="fas fa-list-alt"></i>
+					        Categories
+					    </a>
+					</li>
 
                         <li class="nav-item">
                             <a class="nav-link" href="accounts.jsp">
@@ -367,15 +377,15 @@
         </footer>
     </div>
 
-    <script src="../js/jquery-3.3.1.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
     <!-- https://jquery.com/download/ -->
-    <script src="../js/moment.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/moment.min.js"></script>
     <!-- https://momentjs.com/ -->
-    <script src="../js/Chart.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/Chart.min.js"></script>
     <!-- http://www.chartjs.org/docs/latest/ -->
-    <script src="../js/bootstrap.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
     <!-- https://getbootstrap.com/ -->
-    <script src="../js/tooplate-scripts.js"></script>
+    <script src="${pageContext.request.contextPath}/js/tooplate-scripts.js"></script>
     <script>
         Chart.defaults.global.defaultFontColor = 'white';
         let ctxLine,
