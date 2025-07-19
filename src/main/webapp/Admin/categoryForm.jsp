@@ -1,130 +1,116 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.Category" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <c:if test="${category != null}">Edit Category</c:if>
-        <c:if test="${category == null}">Add New Category</c:if>
-    </title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Pahana Edu - <%= request.getParameter("id") != null ? "Edit" : "Add" %> Category</title>
+  
+  <!-- Same styles as adminDashboard -->
+  <link href="${pageContext.request.contextPath}/assets/css/pace.min.css" rel="stylesheet"/>
+  <script src="${pageContext.request.contextPath}/assets/js/pace.min.js"></script>
+  <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="${pageContext.request.contextPath}/assets/css/animate.css" rel="stylesheet"/>
+  <link href="${pageContext.request.contextPath}/assets/css/icons.css" rel="stylesheet"/>
+  <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
+  <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
-<body id="reportsPage">
-    <div class="" id="home">
-        <nav class="navbar navbar-expand-xl">
-            <div class="container h-100">
-                <a class="navbar-brand" href="index.jsp">
-                    <h1 class="tm-site-title mb-0">Product Admin</h1>
-                </a>
-                <button class="navbar-toggler ml-auto mr-0" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars tm-nav-icon"></i>
-                </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mx-auto h-100">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.jsp">
-                                <i class="fas fa-tachometer-alt"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="CategoryServlet?action=list">
-                                <i class="fas fa-list-alt"></i>
-                                Categories
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="products.jsp">
-                                <i class="fas fa-shopping-cart"></i>
-                                Products
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link d-block" href="${pageContext.request.contextPath}/Auth/index.jsp">
-                                Admin, <b>Logout</b>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <p class="text-white mt-5 mb-5">Welcome back, <b>Admin</b></p>
-                </div>
-            </div>
-            
-            <div class="row tm-content-row">
-                <div class="col-12">
-                    <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
-                        <div class="row">
-                            <div class="col-12">
-                                <h2 class="tm-block-title">
-                                    <c:if test="${category != null}">Edit Category</c:if>
-                                    <c:if test="${category == null}">Add New Category</c:if>
-                                </h2>
-                            </div>
-                        </div>
-                        
-                        <div class="row tm-edit-product-row">
-                            <div class="col-xl-6 col-lg-6 col-md-12">
-                                <form action="CategoryServlet" method="post" class="tm-edit-product-form">
-                                    <c:if test="${category != null}">
-                                        <input type="hidden" name="id" value="${category.categoryId}" />
-                                    </c:if>
-                                    
-                                    <input type="hidden" name="action" 
-                                           value="${category == null ? 'insert' : 'update'}" />
-                                    
-                                    <div class="form-group mb-3">
-                                        <label for="name">Category Name</label>
-                                        <input id="name" name="name" type="text" class="form-control validate" 
-                                               value="${category.categoryName}" required />
-                                    </div>
-                                    
-                                    <div class="form-group mb-3">
-                                        <label for="description">Description</label>
-                                        <textarea id="description" name="description" class="form-control validate" 
-                                                  rows="3">${category.description}</textarea>
-                                    </div>
-                                    
-                                    <div class="form-group mt-4">
-                                        <button type="submit" class="btn btn-primary btn-block">
-                                            <c:if test="${category != null}">Update</c:if>
-                                            <c:if test="${category == null}">Add</c:if>
-                                        </button>
-                                        <a href="${pageContext.request.contextPath}/CategoryServlet?action=list" class="btn btn-danger btn-block">
-                                            Cancel
-                                        </a>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <footer class="tm-footer row tm-mt-small">
-            <div class="col-12 font-weight-light">
-                <p class="text-center text-white mb-0 px-4 small">
-                    Copyright &copy; <b>2023</b> All rights reserved. 
-                    Design: <a rel="nofollow noopener" href="https://templatemo.com" class="tm-footer-link">Template Mo</a>
-                </p>
-            </div>
-        </footer>
+<body class="bg-theme bg-theme1">
+ 
+<div id="wrapper">
+  <!-- Same sidebar as adminDashboard -->
+  <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
+    <div class="brand-logo">
+      <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+        <img src="${pageContext.request.contextPath}/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+        <h5 class="logo-text">Pahana Edu</h5>
+      </a>
     </div>
+    <ul class="sidebar-menu do-nicescrol">
+      <li class="sidebar-header">MAIN NAVIGATION</li>
+      <li>
+        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+          <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="${pageContext.request.contextPath}/CategoryServlet?action=list">
+          <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
+        </a>
+      </li>
+      <!-- Other menu items -->
+    </ul>
+  </div>
 
-    <script src="../js/jquery-3.3.1.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
+  <header class="topbar-nav">
+    <nav class="navbar navbar-expand fixed-top">
+      <!-- Same topbar as adminDashboard -->
+    </nav>
+  </header>
+
+  <div class="clearfix"></div>
+  
+  <div class="content-wrapper">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 col-lg-6 mx-auto">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title"><%= request.getParameter("id") != null ? "Edit" : "Add" %> Category</h4>
+            </div>
+            <div class="card-body">
+              <form action="${pageContext.request.contextPath}/CategoryServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
+                <% if (request.getParameter("id") != null) { %>
+                <input type="hidden" name="id" value="<%= request.getParameter("id") %>">
+                <% } %>
+                
+                <div class="form-group">
+                  <label for="name">Category Name</label>
+                  <input type="text" class="form-control" id="name" name="name" 
+                         value="<%= request.getAttribute("category") != null ? ((Category)request.getAttribute("category")).getCategoryName() : "" %>" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="description">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3"><%= request.getAttribute("category") != null ? ((Category)request.getAttribute("category")).getDescription() : "" %></textarea>
+                </div>
+                
+                <div class="form-group text-center">
+                  <button type="submit" class="btn btn-primary mr-2">
+                    <i class="fa fa-save"></i> Save
+                  </button>
+                  <a href="${pageContext.request.contextPath}/CategoryServlet?action=list" class="btn btn-light">
+                    <i class="fa fa-times"></i> Cancel
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Same footer as adminDashboard -->
+  <footer class="footer">
+    <div class="container">
+      <div class="text-center">
+        Copyright &copy; <b><%= java.time.Year.now().getValue() %></b> Pahana Edu Management System
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- Same scripts as adminDashboard -->
+<script src="${pageContext.request.contextPath}/assets/js/jquery.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/popper.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
 </body>
 </html>
