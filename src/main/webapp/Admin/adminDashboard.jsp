@@ -66,12 +66,12 @@
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
-
+      
       <li>
-        <a href="#">
-          <i class="zmdi zmdi-grid"></i> <span>Products</span>
-        </a>
-      </li>
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
 
       <li>
         <a href="accounts.jsp">
@@ -167,48 +167,49 @@
   <div class="content-wrapper">
     <div class="container-fluid">
       <!--Start Dashboard Content-->
-      <div class="card mt-3">
-        <div class="card-content">
-          <div class="row row-group m-0">
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
-              <div class="card-body">
-                <h5 class="text-white mb-0">9526 <span class="float-right"><i class="fa fa-shopping-cart"></i></span></h5>
-                <div class="progress my-3" style="height:3px;">
-                  <div class="progress-bar" style="width:55%"></div>
-                </div>
-                <p class="mb-0 text-white small-font">Total Orders <span class="float-right">+4.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
-              <div class="card-body">
-                <h5 class="text-white mb-0">8323 <span class="float-right"><i class="fa fa-usd"></i></span></h5>
-                <div class="progress my-3" style="height:3px;">
-                  <div class="progress-bar" style="width:55%"></div>
-                </div>
-                <p class="mb-0 text-white small-font">Total Revenue <span class="float-right">+1.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
-              <div class="card-body">
-                <h5 class="text-white mb-0">6200 <span class="float-right"><i class="fa fa-eye"></i></span></h5>
-                <div class="progress my-3" style="height:3px;">
-                  <div class="progress-bar" style="width:55%"></div>
-                </div>
-                <p class="mb-0 text-white small-font">Visitors <span class="float-right">+5.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
-              <div class="card-body">
-                <h5 class="text-white mb-0">5630 <span class="float-right"><i class="fa fa-envira"></i></span></h5>
-                <div class="progress my-3" style="height:3px;">
-                  <div class="progress-bar" style="width:55%"></div>
-                </div>
-                <p class="mb-0 text-white small-font">Messages <span class="float-right">+2.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>  
+      <!-- In the dashboard content section, replace the card content with: -->
+		<div class="card mt-3">
+		  <div class="card-content">
+		    <div class="row row-group m-0">
+		      <div class="col-12 col-lg-6 col-xl-3 border-light">
+		        <div class="card-body">
+		          <h5 class="text-white mb-0">${productCount} <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
+		          <div class="progress my-3" style="height:3px;">
+		            <div class="progress-bar" style="width:55%"></div>
+		          </div>
+		          <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+		        </div>
+		      </div>
+		      <div class="col-12 col-lg-6 col-xl-3 border-light">
+		        <div class="card-body">
+		          <h5 class="text-white mb-0">${lowStockCount} <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
+		          <div class="progress my-3" style="height:3px;">
+		            <div class="progress-bar" style="width:55%"></div>
+		          </div>
+		          <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+		        </div>
+		      </div>
+		      <div class="col-12 col-lg-6 col-xl-3 border-light">
+		        <div class="card-body">
+		          <h5 class="text-white mb-0">${outOfStockCount} <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
+		          <div class="progress my-3" style="height:3px;">
+		            <div class="progress-bar" style="width:55%"></div>
+		          </div>
+		          <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+		        </div>
+		      </div>
+		      <div class="col-12 col-lg-6 col-xl-3 border-light">
+		        <div class="card-body">
+		          <h5 class="text-white mb-0">${categoryCount} <span class="float-right"><i class="fa fa-tags"></i></span></h5>
+		          <div class="progress my-3" style="height:3px;">
+		            <div class="progress-bar" style="width:55%"></div>
+		          </div>
+		          <p class="mb-0 text-white small-font">Categories <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+		        </div>
+		      </div>
+		    </div>
+		  </div>
+		</div>
       
       <!-- Rest of your dashboard content remains the same -->
       <!-- ... -->
