@@ -42,11 +42,11 @@ public class LoginServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-	    String usernameOrEmail  = req.getParameter("username");
+	    String usernameOrEmail = req.getParameter("username");
 	    String password = req.getParameter("password");
 
 	    UserDAO dao = new UserDAO();
-	    User user = dao.checkLogin(usernameOrEmail , password);
+	    User user = dao.checkLogin(usernameOrEmail, password);
 
 	    if(user != null) {
 	        HttpSession session = req.getSession();
@@ -55,23 +55,29 @@ public class LoginServlet extends HttpServlet {
 	        Cookie cookie = new Cookie("username", user.getUsername());
 	        res.addCookie(cookie);
 
-	        if(user.getRole().equals("admin")) {
-	            // Send email notification to Admin
-	            try {
-	                String emailContent = "Dear Admin,\n\n" +
-	                    "You have successfully logged into the Book Management System at " + 
-	                    new java.util.Date() + ".\n\n" +
-	                    "If this was not you, please contact the system administrator immediately.\n\n" +
-	                    "Best regards,\n" +
-	                    "Book Management System Team";
-	                
-	                EmailUtility.sendEmail(user.getEmail(), "Login Notification", emailContent);
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	            }
+	        // Send email notification
+	        try {
+	            String emailContent = "Dear " + user.getUsername() + ",\n\n" +
+	                "You have successfully logged into the Pahana Edu System at " + 
+	                new java.util.Date() + ".\n\n" +
+	                "If this was not you, please contact the system administrator immediately.\n\n" +
+	                "Best regards,\n" +
+	                "Pahana Edu Team";
+	            
+	            EmailUtility.sendEmail(user.getEmail(), "Login Notification", emailContent);
+	        } catch (Exception e) {
+	            e.printStackTrace();
 	        }
 
-	        res.sendRedirect(req.getContextPath() + "/Admin/adminDashboard.jsp");
+	        // Redirect based on role
+	        if(user.getRole().equals("admin")) {
+	            res.sendRedirect(req.getContextPath() + "/Admin/adminDashboard.jsp");
+	        } else if(user.getRole().equals("cashier")) {
+	            res.sendRedirect(req.getContextPath() + "/Cashier/cashierDashboard.jsp");
+	        } else {
+	            // Handle other roles or default case
+	            res.sendRedirect(req.getContextPath() + "/Auth/index.jsp");
+	        }
 	    } else {
 	        req.setAttribute("error", "Invalid username or password");
 	        RequestDispatcher rd = req.getRequestDispatcher("/Auth/index.jsp");

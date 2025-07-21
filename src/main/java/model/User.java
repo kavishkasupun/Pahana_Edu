@@ -1,5 +1,7 @@
 package model;
 
+import java.sql.Timestamp;
+
 public class User {
     private int id;
     private String username;
@@ -7,10 +9,9 @@ public class User {
     private String email;
     private String role;
     private boolean verified;
+    private Timestamp createdAt;
     
-
     // Getters and Setters
-
     public int getId() {
         return id;
     }
@@ -51,5 +52,12 @@ public class User {
     }
     public void setVerified(boolean verified) {
         this.verified = verified;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }

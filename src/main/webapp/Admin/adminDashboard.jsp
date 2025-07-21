@@ -73,11 +73,11 @@
 		 </a>
 	 </li>
 
-      <li>
-        <a href="accounts.jsp">
-          <i class="zmdi zmdi-face"></i> <span>Accounts</span>
-        </a>
-      </li>
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
+	    <a href="accounts.jsp">
+	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
+	    </a>
+	</li>
 
       <li class="sidebar-header">SETTINGS</li>
       <li>
