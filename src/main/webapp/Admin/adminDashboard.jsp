@@ -78,6 +78,17 @@
 	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
 	    </a>
 	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=list">
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales</span>
+	  </a>
+	</li>
 
       <li class="sidebar-header">SETTINGS</li>
       <li>

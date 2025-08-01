@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import model.Customer;
 import dao.CustomerDAO;
 import util.EmailUtility;
+import com.google.gson.Gson;
 
 @WebServlet("/CustomerServlet")
 public class CustomerServlet extends HttpServlet {
@@ -24,6 +25,11 @@ public class CustomerServlet extends HttpServlet {
         String action = request.getParameter("action");
         
         try {
+            if (action == null) {
+                listCustomers(request, response);
+                return;
+            }
+            
             switch (action) {
                 case "new":
                     showNewForm(request, response);
@@ -39,6 +45,9 @@ public class CustomerServlet extends HttpServlet {
                     break;
                 case "update":
                     updateCustomer(request, response);
+                    break;
+                case "search":  // New search action for cashier
+                    searchCustomers(request, response);
                     break;
                 default:
                     listCustomers(request, response);
@@ -119,5 +128,15 @@ public class CustomerServlet extends HttpServlet {
         } else {
             throw new Exception("Could not delete customer");
         }
+    }
+
+    private void searchCustomers(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String keyword = request.getParameter("keyword");
+        List<Customer> customers = customerDAO.searchCustomers(keyword);
+        
+        // Convert to JSON and send response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new Gson().toJson(customers));
     }
 }

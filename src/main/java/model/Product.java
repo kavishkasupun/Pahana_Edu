@@ -11,6 +11,7 @@ public class Product {
     private double price;
     private int quantity;
     private byte[] image;
+    private String imageBase64;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private String categoryName; // For display purposes
@@ -73,10 +74,17 @@ public class Product {
     }
     
     public String getImageBase64() {
+        if (imageBase64 != null) {
+            return imageBase64;
+        }
         if (image != null) {
             return Base64.getEncoder().encodeToString(image);
         }
         return "";
+    }
+    
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
     }
     
     public Timestamp getCreatedAt() {
@@ -106,4 +114,5 @@ public class Product {
     public boolean isOutOfStock() {
         return quantity <= 0;
     }
+    
 }

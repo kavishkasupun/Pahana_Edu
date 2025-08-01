@@ -1,0 +1,406 @@
+package controller;
+
+import dao.*;
+import model.*;
+import util.EmailUtility;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+@WebServlet(name = "InvoiceServlet", urlPatterns = {"/InvoiceServlet"})
+public class InvoiceServlet extends HttpServlet {
+    private ProductDAO productDAO;
+    private CustomerDAO customerDAO;
+    private InvoiceDAO invoiceDAO;
+    private InvoiceItemDAO invoiceItemDAO;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        productDAO = new ProductDAO();
+        customerDAO = new CustomerDAO();
+        invoiceDAO = new InvoiceDAO();
+        invoiceItemDAO = new InvoiceItemDAO();
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        
+        if (action == null) {
+            action = "list";
+        }
+
+        try {
+            switch (action) {
+                case "new":
+                    showNewInvoiceForm(request, response);
+                    break;
+                case "list":
+                    listInvoices(request, response);
+                    break;
+                case "view":
+                    viewInvoice(request, response);
+                    break;
+                case "print":
+                    printInvoice(request, response);
+                    break;
+                default:
+                    listInvoices(request, response);
+            }
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        
+        if (action == null) {
+            response.sendRedirect("InvoiceServlet?action=list");
+            return;
+        }
+
+        try {
+            switch (action) {
+                case "searchCustomer":
+                    searchCustomer(request, response);
+                    break;
+                case "searchProduct":
+                    searchProduct(request, response);
+                    break;
+                case "create":
+                    createInvoice(request, response);
+                    break;
+                default:
+                    listInvoices(request, response);
+            }
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+    }
+
+    private void showNewInvoiceForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CategoryDAO categoryDAO = new CategoryDAO();
+        List<Category> categories = categoryDAO.getAllCategories();
+        request.setAttribute("categories", categories);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/cashier.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void listInvoices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<Invoice> invoices = invoiceDAO.getAllInvoices();
+        request.setAttribute("invoices", invoices);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/invoices.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void viewInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int invoiceId = Integer.parseInt(request.getParameter("id"));
+        Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
+        List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
+        Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
+        
+        request.setAttribute("invoice", invoice);
+        request.setAttribute("items", items);
+        request.setAttribute("customer", customer);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void printInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int invoiceId = Integer.parseInt(request.getParameter("id"));
+        Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
+        List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
+        
+        // Load product for each item
+        for (InvoiceItem item : items) {
+            Product product = productDAO.getProductById(item.getProductId());
+            item.setProduct(product);  // This will now work
+        }
+        
+        Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
+        
+        request.setAttribute("invoice", invoice);
+        request.setAttribute("items", items);
+        request.setAttribute("customer", customer);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/printInvoice.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void searchCustomer(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String keyword = request.getParameter("keyword");
+        List<Customer> customers = customerDAO.searchCustomers(keyword);
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new Gson().toJson(customers));
+    }
+
+    private void searchProduct(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String keyword = request.getParameter("keyword");
+        String categoryId = request.getParameter("categoryId");
+        List<Product> products = productDAO.searchProducts(keyword, categoryId);
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new Gson().toJson(products));
+    }
+
+    private void createInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        Gson gson = new Gson();
+        Map<String, Object> responseData = new HashMap<>();
+        Connection connection = null;
+
+        try {
+            // Get a new connection for transaction
+            connection = DBConnection.getConnection();
+            if (connection == null) {
+                throw new SQLException("Failed to get database connection");
+            }
+            connection.setAutoCommit(false); // Start transaction
+
+            // Validate required parameters
+            if (request.getParameter("customerId") == null || request.getParameter("amountPaid") == null || 
+                request.getParameter("items") == null) {
+                throw new ServletException("Missing required parameters");
+            }
+
+            int customerId = Integer.parseInt(request.getParameter("customerId"));
+            double amountPaid = Double.parseDouble(request.getParameter("amountPaid"));
+            String itemsJson = request.getParameter("items");
+
+            // Validate user session
+            if (user == null) {
+                throw new ServletException("User session expired");
+            }
+
+            // Parse cart items
+            List<CartItem> cartItems = gson.fromJson(itemsJson, new TypeToken<List<CartItem>>(){}.getType());
+            if (cartItems == null || cartItems.isEmpty()) {
+                throw new ServletException("No items in cart");
+            }
+
+            // Calculate totals
+            double subtotal = cartItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
+            // Validate payment
+            if (amountPaid < subtotal) {
+                throw new ServletException("Amount paid is less than subtotal");
+            }
+
+            // Create invoice
+            Invoice invoice = new Invoice();
+            invoice.setCustomerId(customerId);
+            invoice.setUserId(user.getId());
+            invoice.setSubtotal(subtotal);
+            invoice.setTotal(subtotal);
+            invoice.setAmountPaid(amountPaid);
+            invoice.setBalance(amountPaid - subtotal);
+            invoice.setInvoiceDate(Timestamp.valueOf(LocalDateTime.now()));
+
+            // Add invoice to database
+            InvoiceDAO invoiceDAO = new InvoiceDAO();
+            int invoiceId = invoiceDAO.addInvoice(invoice, connection); // Pass connection
+            if (invoiceId <= 0) {
+                throw new ServletException("Failed to create invoice");
+            }
+
+            // Add invoice items and update product quantities
+            InvoiceItemDAO invoiceItemDAO = new InvoiceItemDAO();
+            ProductDAO productDAO = new ProductDAO();
+            
+            for (CartItem cartItem : cartItems) {
+                // Check product availability
+                Product product = productDAO.getProductById(cartItem.getProductId(), connection);
+                if (product == null) {
+                    throw new ServletException("Product not found: " + cartItem.getProductId());
+                }
+                
+                if (product.getQuantity() < cartItem.getQuantity()) {
+                    throw new ServletException("Insufficient stock for product: " + product.getProductName());
+                }
+
+                // Create invoice item
+                InvoiceItem item = new InvoiceItem();
+                item.setInvoiceId(invoiceId);
+                item.setProductId(cartItem.getProductId());
+                item.setQuantity(cartItem.getQuantity());
+                item.setUnitPrice(cartItem.getPrice());
+                item.setTotal(cartItem.getPrice() * cartItem.getQuantity());
+                
+                if (!invoiceItemDAO.addInvoiceItem(item, connection)) {
+                    throw new ServletException("Failed to add invoice item");
+                }
+
+                // Update product stock
+                product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+                if (!productDAO.updateProduct(product, connection)) {
+                    throw new ServletException("Failed to update product stock");
+                }
+            }
+
+            // Commit transaction
+            connection.commit();
+
+            // Try to send email receipt
+            boolean emailSent = false;
+            try {
+                emailSent = sendEmailReceipt(invoiceId, customerId);
+            } catch (Exception e) {
+                System.err.println("Failed to send email receipt: " + e.getMessage());
+            }
+
+            // Prepare success response
+            responseData.put("success", true);
+            responseData.put("invoiceId", invoiceId);
+            responseData.put("emailSent", emailSent);
+
+        } catch (Exception e) {
+            // Rollback transaction if there's an error
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    System.err.println("Error during rollback: " + ex.getMessage());
+                }
+            }
+            e.printStackTrace();
+            responseData.put("success", false);
+            responseData.put("message", e.getMessage());
+        } finally {
+            // Close connection
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true); // Reset auto-commit
+                    connection.close();
+                } catch (SQLException e) {
+                    System.err.println("Error closing connection: " + e.getMessage());
+                }
+            }
+        }
+
+        // Send response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(gson.toJson(responseData));
+    }
+
+    private boolean sendEmailReceipt(int invoiceId, int customerId) {
+        try {
+            Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
+            Customer customer = customerDAO.getCustomerById(customerId);
+            List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
+            
+            // Load products for each item
+            for (InvoiceItem item : items) {
+                Product product = productDAO.getProductById(item.getProductId());
+                item.setProduct(product);
+            }
+            
+            String subject = "Your Invoice #" + invoiceId + " from Pahana Edu";
+            
+            // Build HTML content
+            StringBuilder html = new StringBuilder();
+            html.append("<!DOCTYPE html>");
+            html.append("<html>");
+            html.append("<head>");
+            html.append("<meta charset='UTF-8'>");
+            html.append("<style>");
+            html.append("body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }");
+            html.append("h2 { color: #2c3e50; }");
+            html.append("table { width: 100%; border-collapse: collapse; margin: 20px 0; }");
+            html.append("th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }");
+            html.append("th { background-color: #f2f2f2; }");
+            html.append(".text-right { text-align: right; }");
+            html.append(".total-row { font-weight: bold; }");
+            html.append("</style>");
+            html.append("</head>");
+            html.append("<body>");
+            
+            // Invoice header
+            html.append("<h2>Invoice #").append(invoiceId).append("</h2>");
+            html.append("<p><strong>Date:</strong> ").append(invoice.getInvoiceDate()).append("</p>");
+            
+            // Customer details
+            html.append("<h3>Customer Details</h3>");
+            html.append("<p><strong>Name:</strong> ").append(customer.getName()).append("</p>");
+            html.append("<p><strong>Email:</strong> ").append(customer.getEmail()).append("</p>");
+            if (customer.getTelephone() != null && !customer.getTelephone().isEmpty()) {
+                html.append("<p><strong>Phone:</strong> ").append(customer.getTelephone()).append("</p>");
+            }
+            
+            // Items table
+            html.append("<h3>Items</h3>");
+            html.append("<table>");
+            html.append("<thead><tr><th>Item</th><th>Qty</th><th>Price</th><th class='text-right'>Total</th></tr></thead>");
+            html.append("<tbody>");
+            
+            for (InvoiceItem item : items) {
+                html.append("<tr>");
+                html.append("<td>").append(item.getProduct().getProductName()).append("</td>");
+                html.append("<td>").append(item.getQuantity()).append("</td>");
+                html.append("<td>Rs. ").append(String.format("%.2f", item.getUnitPrice())).append("</td>");
+                html.append("<td class='text-right'>Rs. ").append(String.format("%.2f", item.getTotal())).append("</td>");
+                html.append("</tr>");
+            }
+            
+            // Summary
+            html.append("<tr class='total-row'>");
+            html.append("<td colspan='3'><strong>Subtotal:</strong></td>");
+            html.append("<td class='text-right'>Rs. ").append(String.format("%.2f", invoice.getSubtotal())).append("</td>");
+            html.append("</tr>");
+            
+            html.append("<tr class='total-row'>");
+            html.append("<td colspan='3'><strong>Amount Paid:</strong></td>");
+            html.append("<td class='text-right'>Rs. ").append(String.format("%.2f", invoice.getAmountPaid())).append("</td>");
+            html.append("</tr>");
+            
+            html.append("<tr class='total-row'>");
+            html.append("<td colspan='3'><strong>Balance:</strong></td>");
+            html.append("<td class='text-right'>Rs. ").append(String.format("%.2f", invoice.getBalance())).append("</td>");
+            html.append("</tr>");
+            
+            html.append("</tbody></table>");
+            html.append("<p>Thank you for your purchase!</p>");
+            html.append("</body></html>");
+            
+            // Send the email
+            EmailUtility.sendHtmlEmail(customer.getEmail(), subject, html.toString());
+            return true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
+
+class CartItem {
+    private int productId;
+    private String productName;
+    private double price;
+    private int quantity;
+    
+    // Getters and Setters
+    public int getProductId() { return productId; }
+    public void setProductId(int productId) { this.productId = productId; }
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+}

@@ -3,6 +3,8 @@ package controller;
 import dao.CategoryDAO;
 import dao.ProductDAO;
 import model.Product;
+import com.google.gson.Gson;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -30,6 +32,11 @@ public class ProductServlet extends HttpServlet {
         String action = request.getParameter("action");
         
         try {
+            if (action == null) {
+                listProducts(request, response);
+                return;
+            }
+            
             switch (action) {
                 case "new":
                     showNewForm(request, response);
@@ -48,6 +55,9 @@ public class ProductServlet extends HttpServlet {
                     break;
                 case "lowstock":
                     listLowStockProducts(request, response);
+                    break;
+                case "search":  // New search action for cashier
+                    searchProducts(request, response);
                     break;
                 case "list":
                 default:
@@ -150,5 +160,17 @@ public class ProductServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         productDAO.deleteProduct(id);
         response.sendRedirect("ProductServlet?action=list");
+    }
+
+    private void searchProducts(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String keyword = request.getParameter("keyword");
+        String categoryId = request.getParameter("categoryId");
+        
+        List<Product> products = productDAO.searchProducts(keyword, categoryId);
+        
+        // Convert to JSON and send response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new Gson().toJson(products));
     }
 }

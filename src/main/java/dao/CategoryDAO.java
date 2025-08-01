@@ -14,7 +14,7 @@ public class CategoryDAO {
 
     // Add a new category
     public boolean addCategory(Category category) {
-        String sql = "INSERT INTO categories (category_name, description) VALUES (?, ?)";
+        String sql = "INSERT INTO items (category_name, description) VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, category.getCategoryName());
             statement.setString(2, category.getDescription());
@@ -27,7 +27,7 @@ public class CategoryDAO {
 
     // Update a category
     public boolean updateCategory(Category category) {
-        String sql = "UPDATE categories SET category_name = ?, description = ? WHERE category_id = ?";
+        String sql = "UPDATE items SET category_name = ?, description = ? WHERE category_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, category.getCategoryName());
             statement.setString(2, category.getDescription());
@@ -41,7 +41,7 @@ public class CategoryDAO {
 
     // Delete a category
     public boolean deleteCategory(int categoryId) {
-        String sql = "DELETE FROM categories WHERE category_id = ?";
+        String sql = "DELETE FROM items WHERE category_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, categoryId);
             return statement.executeUpdate() > 0;
@@ -51,10 +51,10 @@ public class CategoryDAO {
         }
     }
 
-    // Get all categories
+    // Get all items
     public List<Category> getAllCategories() {
         List<Category> categories = new ArrayList<>();
-        String sql = "SELECT * FROM categories";
+        String sql = "SELECT * FROM items";
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
             
@@ -80,7 +80,7 @@ public class CategoryDAO {
 
     // Get category by ID
     public Category getCategoryById(int categoryId) {
-        String sql = "SELECT * FROM categories WHERE category_id = ?";
+        String sql = "SELECT * FROM items WHERE category_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, categoryId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -103,7 +103,7 @@ public class CategoryDAO {
     // Search categories by name
     public List<Category> searchCategories(String keyword) {
         List<Category> categories = new ArrayList<>();
-        String sql = "SELECT * FROM categories WHERE category_name LIKE ?";
+        String sql = "SELECT * FROM items WHERE category_name LIKE ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, "%" + keyword + "%");
             try (ResultSet resultSet = statement.executeQuery()) {
