@@ -56,7 +56,7 @@
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp" class="<%= request.getRequestURI().endsWith("adminDashboard.jsp") ? "active" : "" %>">
+        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp" class="active">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
@@ -68,12 +68,12 @@
       </li>
       
       <li>
-		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list">
 		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
 		 </a>
 	 </li>
 
-     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %> ">
 	    <a href="accounts.jsp">
 	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
 	    </a>
@@ -84,9 +84,11 @@
 	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
 	  </a>
 	</li>
+	
 	<li>
-	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=list">
-	    <i class="zmdi zmdi-receipt"></i> <span>Sales</span>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+	     >
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
 	  </a>
 	</li>
 

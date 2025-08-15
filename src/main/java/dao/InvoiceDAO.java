@@ -3,7 +3,9 @@ package dao;
 import model.Invoice;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InvoiceDAO {
     private Connection connection;
@@ -98,4 +100,50 @@ public class InvoiceDAO {
     public void close() {
         DBConnection.closeConnection(connection);
     }
+    
+    public List<Invoice> getInvoicesByDateRange(java.util.Date startDate, java.util.Date endDate) {
+        List<Invoice> invoices = new ArrayList<>();
+        String sql = "SELECT * FROM invoices WHERE invoice_date BETWEEN ? AND ? ORDER BY invoice_date DESC";
+        
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setTimestamp(1, new Timestamp(startDate.getTime()));
+            statement.setTimestamp(2, new Timestamp(endDate.getTime() + 86400000)); // Add 1 day to include end date
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    invoices.add(mapResultSetToInvoice(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting invoices by date range: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+        return invoices;
+    }
+
+    public Map<String, Double> getDailySalesSummary(java.util.Date startDate, java.util.Date endDate) {
+        Map<String, Double> dailySales = new LinkedHashMap<>();
+        String sql = "SELECT DATE(invoice_date) as sale_date, SUM(total) as daily_total " +
+                     "FROM invoices WHERE invoice_date BETWEEN ? AND ? " +
+                     "GROUP BY DATE(invoice_date) ORDER BY sale_date";
+        
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setTimestamp(1, new Timestamp(startDate.getTime()));
+            statement.setTimestamp(2, new Timestamp(endDate.getTime() + 86400000));
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    dailySales.put(
+                        resultSet.getString("sale_date"),
+                        resultSet.getDouble("daily_total")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting daily sales summary: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+        return dailySales;
+    }
+    
 }

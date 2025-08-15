@@ -8,9 +8,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import com.google.gson.Gson;
@@ -52,6 +54,12 @@ public class InvoiceServlet extends HttpServlet {
                     break;
                 case "print":
                     printInvoice(request, response);
+                    break;
+                case "report":
+                    showSalesReport(request, response);
+                    break;
+                case "export":
+                    exportSalesToExcel(request, response);
                     break;
                 default:
                     listInvoices(request, response);
@@ -103,18 +111,43 @@ public class InvoiceServlet extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
-    private void viewInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int invoiceId = Integer.parseInt(request.getParameter("id"));
-        Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
-        List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
-        Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
-        
-        request.setAttribute("invoice", invoice);
-        request.setAttribute("items", items);
-        request.setAttribute("customer", customer);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
-        dispatcher.forward(request, response);
-    }
+    private void viewInvoice(HttpServletRequest request, HttpServletResponse response) 
+    	    throws ServletException, IOException {
+    	    
+    	    try {
+    	        String idParam = request.getParameter("id");
+    	        if (idParam == null || idParam.isEmpty()) {
+    	            throw new ServletException("Invoice ID is required");
+    	        }
+
+    	        int invoiceId = Integer.parseInt(idParam);
+    	        Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
+    	        if (invoice == null) {
+    	            throw new ServletException("Invoice not found with ID: " + invoiceId);
+    	        }
+
+    	        List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
+    	        // Load products for each item
+    	        for (InvoiceItem item : items) {
+    	            Product product = productDAO.getProductById(item.getProductId());
+    	            item.setProduct(product);
+    	        }
+
+    	        Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
+    	        
+    	        request.setAttribute("invoice", invoice);
+    	        request.setAttribute("items", items);
+    	        request.setAttribute("customer", customer);
+    	        
+    	        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
+    	        dispatcher.forward(request, response);
+    	        
+    	    } catch (NumberFormatException e) {
+    	        throw new ServletException("Invalid Invoice ID format", e);
+    	    } catch (Exception e) {
+    	        throw new ServletException("Error viewing invoice: " + e.getMessage(), e);
+    	    }
+    	}
 
     private void printInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int invoiceId = Integer.parseInt(request.getParameter("id"));
@@ -386,6 +419,100 @@ public class InvoiceServlet extends HttpServlet {
             return false;
         }
     }
+    
+    
+    private void showSalesReport(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            
+            // Get date parameters from request or use defaults
+            String startDateParam = request.getParameter("startDate");
+            String endDateParam = request.getParameter("endDate");
+            
+            Date startDate;
+            Date endDate;
+            
+            // Set default date range (last 7 days) if parameters are not provided
+            if (startDateParam == null || startDateParam.isEmpty()) {
+                startDate = new Date(System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000));
+            } else {
+                startDate = dateFormat.parse(startDateParam);
+            }
+            
+            if (endDateParam == null || endDateParam.isEmpty()) {
+                endDate = new Date();
+            } else {
+                endDate = dateFormat.parse(endDateParam);
+            }
+            
+            // Add one day to end date to include the entire day
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.add(Calendar.DATE, 1);
+            endDate = cal.getTime();
+            
+            // Get both daily sales summary and invoices list
+            Map<String, Double> dailySales = invoiceDAO.getDailySalesSummary(startDate, endDate);
+            List<Invoice> invoices = invoiceDAO.getInvoicesByDateRange(startDate, endDate);
+            
+            // Set all required attributes
+            request.setAttribute("dailySales", dailySales);
+            request.setAttribute("invoices", invoices);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
+            
+            // Also set DAOs in request for JSTL access
+            request.setAttribute("customerDAO", customerDAO);
+            request.setAttribute("invoiceItemDAO", invoiceItemDAO);
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/salesReport.jsp");
+            dispatcher.forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServletException("Error generating sales report: " + e.getMessage(), e);
+        }
+    }
+
+    	private void exportSalesToExcel(HttpServletRequest request, HttpServletResponse response) 
+    	    throws ServletException, IOException {
+    	    
+    	    try {
+    	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    	        java.util.Date startDate = dateFormat.parse(request.getParameter("startDate"));
+    	        java.util.Date endDate = dateFormat.parse(request.getParameter("endDate"));
+    	        
+    	        List<Invoice> invoices = invoiceDAO.getInvoicesByDateRange(startDate, endDate);
+    	        
+    	        response.setContentType("application/vnd.ms-excel");
+    	        response.setHeader("Content-Disposition", "attachment; filename=sales_report_" + 
+    	            dateFormat.format(startDate) + "_to_" + dateFormat.format(endDate) + ".xls");
+    	        
+    	        PrintWriter out = response.getWriter();
+    	        
+    	        // Excel header
+    	        out.println("Invoice ID\tDate\tCustomer ID\tSubtotal\tTotal\tAmount Paid\tBalance");
+    	        
+    	        // Excel data rows
+    	        for (Invoice invoice : invoices) {
+    	            out.println(
+    	                invoice.getInvoiceId() + "\t" +
+    	                invoice.getInvoiceDate() + "\t" +
+    	                invoice.getCustomerId() + "\t" +
+    	                invoice.getSubtotal() + "\t" +
+    	                invoice.getTotal() + "\t" +
+    	                invoice.getAmountPaid() + "\t" +
+    	                invoice.getBalance()
+    	            );
+    	        }
+    	        
+    	        out.close();
+    	    } catch (Exception e) {
+    	        throw new ServletException(e);
+    	    }
+    	}
+    	
 }
 
 class CartItem {

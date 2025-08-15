@@ -99,7 +99,7 @@
             </div>
             <div class="card-body">
               <div class="table-responsive">
-                <table id="categoriesTable" class="table table-bordered table-hover display nowrap" style="width:100%">
+                <table id="categoriesTable" class="table table-bordered table-hover" style="width:100%">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -196,46 +196,49 @@ $(document).ready(function() {
             { responsivePriority: 2, targets: 4 }, // Actions
             { responsivePriority: 3, targets: 0 }, // ID
             { 
-                targets: 4, // Actions column
-                orderable: false,
-                searchable: false
-            },
-            {
                 targets: 3, // Created At column
                 render: function(data, type, row) {
                     if (type === 'display' || type === 'filter') {
-                        if (data) {
-                            return new Date(data).toLocaleString();
+                        if (data && data.trim() !== '') {
+                            try {
+                                return new Date(data).toLocaleString();
+                            } catch(e) {
+                                return data;
+                            }
                         }
                         return '';
                     }
                     return data;
                 }
+            },
+            { 
+                targets: 4, // Actions column
+                orderable: false,
+                searchable: false
             }
-        ],
-        initComplete: function() {
-            // Add custom search field
-            $('.dataTables_filter').html(
-                '<div class="input-group mb-3">' +
-                '<input type="search" class="form-control" placeholder="Search categories..." aria-label="Search">' +
-                '<div class="input-group-append">' +
-                '<button class="btn btn-outline-secondary" type="button"><i class="fa fa-search"></i></button>' +
-                '</div></div>'
-            );
-            
-            // Apply search on button click
-            $('.dataTables_filter button').on('click', function() {
-                var table = $('#categoriesTable').DataTable();
-                table.search($('.dataTables_filter input').val()).draw();
-            });
-            
-            // Apply search on enter key
-            $('.dataTables_filter input').on('keyup', function(e) {
-                if (e.keyCode === 13) {
-                    var table = $('#categoriesTable').DataTable();
-                    table.search(this.value).draw();
-                }
-            });
+        ]
+    });
+    
+    // Custom search field
+    $('.dataTables_filter').html(
+        '<div class="input-group mb-3">' +
+        '<input type="search" class="form-control" placeholder="Search categories..." aria-label="Search">' +
+        '<div class="input-group-append">' +
+        '<button class="btn btn-outline-secondary" type="button"><i class="fa fa-search"></i></button>' +
+        '</div></div>'
+    );
+    
+    var table = $('#categoriesTable').DataTable();
+    
+    // Apply search on button click
+    $('.dataTables_filter button').on('click', function() {
+        table.search($('.dataTables_filter input').val()).draw();
+    });
+    
+    // Apply search on enter key
+    $('.dataTables_filter input').on('keyup', function(e) {
+        if (e.keyCode === 13) {
+            table.search(this.value).draw();
         }
     });
 });
