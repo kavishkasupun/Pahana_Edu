@@ -146,4 +146,17 @@ public class InvoiceDAO {
         return dailySales;
     }
     
+    public int getTotalSalesCount() {
+        String sql = "SELECT COUNT(DISTINCT invoice_id) AS salesCount FROM invoice_items";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("salesCount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
 }

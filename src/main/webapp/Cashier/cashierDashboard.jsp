@@ -44,9 +44,27 @@
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+      
+      <li>
+	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+      
+      <li>
+        <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list">
+          <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
+        </a>
+      </li>
+      
+      <li>
+		 <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
 
       <li>
-        <a href="${pageContext.request.contextPath}/CustomerServlet?action=list">
+        <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list">
           <i class="zmdi zmdi-accounts"></i> <span>Customers</span>
         </a>
       </li>

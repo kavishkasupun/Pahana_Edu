@@ -182,47 +182,47 @@
       <!--Start Dashboard Content-->
       <!-- In the dashboard content section, replace the card content with: -->
 		<div class="card mt-3">
-		  <div class="card-content">
-		    <div class="row row-group m-0">
-		      <div class="col-12 col-lg-6 col-xl-3 border-light">
-		        <div class="card-body">
-		          <h5 class="text-white mb-0">${productCount} <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
-		          <div class="progress my-3" style="height:3px;">
-		            <div class="progress-bar" style="width:55%"></div>
-		          </div>
-		          <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-		        </div>
-		      </div>
-		      <div class="col-12 col-lg-6 col-xl-3 border-light">
-		        <div class="card-body">
-		          <h5 class="text-white mb-0">${lowStockCount} <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
-		          <div class="progress my-3" style="height:3px;">
-		            <div class="progress-bar" style="width:55%"></div>
-		          </div>
-		          <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-		        </div>
-		      </div>
-		      <div class="col-12 col-lg-6 col-xl-3 border-light">
-		        <div class="card-body">
-		          <h5 class="text-white mb-0">${outOfStockCount} <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
-		          <div class="progress my-3" style="height:3px;">
-		            <div class="progress-bar" style="width:55%"></div>
-		          </div>
-		          <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-		        </div>
-		      </div>
-		      <div class="col-12 col-lg-6 col-xl-3 border-light">
-		        <div class="card-body">
-		          <h5 class="text-white mb-0">${categoryCount} <span class="float-right"><i class="fa fa-tags"></i></span></h5>
-		          <div class="progress my-3" style="height:3px;">
-		            <div class="progress-bar" style="width:55%"></div>
-		          </div>
-		          <p class="mb-0 text-white small-font">Categories <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-		        </div>
-		      </div>
-		    </div>
-		  </div>
-		</div>
+	    <div class="card-content">
+	        <div class="row row-group m-0">
+	            <div class="col-12 col-lg-6 col-xl-3 border-light">
+	                <div class="card-body">
+	                    <h5 class="text-white mb-0">${productCount} <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
+	                    <div class="progress my-3" style="height:3px;">
+	                        <div class="progress-bar" style="width:55%"></div>
+	                    </div>
+	                    <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+	                </div>
+	            </div>
+	            <div class="col-12 col-lg-6 col-xl-3 border-light">
+	                <div class="card-body">
+	                    <h5 class="text-white mb-0">${lowStockCount} <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
+	                    <div class="progress my-3" style="height:3px;">
+	                        <div class="progress-bar" style="width:55%"></div>
+	                    </div>
+	                    <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+	                </div>
+	            </div>
+	            <div class="col-12 col-lg-6 col-xl-3 border-light">
+	                <div class="card-body">
+	                    <h5 class="text-white mb-0">${outOfStockCount} <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
+	                    <div class="progress my-3" style="height:3px;">
+	                        <div class="progress-bar" style="width:55%"></div>
+	                    </div>
+	                    <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+	                </div>
+	            </div>
+	            <div class="col-12 col-lg-6 col-xl-3 border-light">
+	                <div class="card-body">
+	                    <h5 class="text-white mb-0">${salesCount} <span class="float-right"><i class="fa fa-chart-line"></i></span></h5>
+	                    <div class="progress my-3" style="height:3px;">
+	                        <div class="progress-bar" style="width:55%"></div>
+	                    </div>
+	                    <p class="mb-0 text-white small-font">Total Sales <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
       
       <!-- Rest of your dashboard content remains the same -->
       <!-- ... -->

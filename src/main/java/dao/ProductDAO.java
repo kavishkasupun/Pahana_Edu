@@ -4,7 +4,9 @@ import model.Product;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductDAO {
     private Connection connection;
@@ -232,5 +234,90 @@ public class ProductDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    public Map<String, Integer> getProductCounts() {
+        Map<String, Integer> counts = new HashMap<>();
+        try {
+            // Total products count
+            String sqlTotal = "SELECT COUNT(*) AS total FROM books";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlTotal)) {
+                if (rs.next()) {
+                    counts.put("totalProducts", rs.getInt("total"));
+                }
+            }
+
+            // Low stock count (quantity <= 5)
+            String sqlLowStock = "SELECT COUNT(*) AS lowStock FROM books WHERE quantity <= 5 AND quantity > 0";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlLowStock)) {
+                if (rs.next()) {
+                    counts.put("lowStock", rs.getInt("lowStock"));
+                }
+            }
+
+            // Out of stock count (quantity = 0)
+            String sqlOutOfStock = "SELECT COUNT(*) AS outOfStock FROM books WHERE quantity = 0";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlOutOfStock)) {
+                if (rs.next()) {
+                    counts.put("outOfStock", rs.getInt("outOfStock"));
+                }
+            }
+
+            // Sales count (from invoices)
+            String sqlSales = "SELECT COUNT(DISTINCT invoice_id) AS salesCount FROM invoice_items";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlSales)) {
+                if (rs.next()) {
+                    counts.put("salesCount", rs.getInt("salesCount"));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error getting product counts: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return counts;
+    }
+    
+    public int getTotalProductsCount() {
+        String sql = "SELECT COUNT(*) AS total FROM books";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getLowStockProductsCount() {
+        String sql = "SELECT COUNT(*) AS lowStock FROM books WHERE quantity <= 5 AND quantity > 0";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("lowStock");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getOutOfStockProductsCount() {
+        String sql = "SELECT COUNT(*) AS outOfStock FROM books WHERE quantity = 0";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("outOfStock");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }
