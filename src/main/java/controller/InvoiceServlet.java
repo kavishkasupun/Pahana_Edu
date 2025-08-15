@@ -35,6 +35,15 @@ public class InvoiceServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Check session first
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        
+        if (user == null && !request.getRequestURI().endsWith("/InvoiceServlet?action=print")) {
+            response.sendRedirect(request.getContextPath() + "/Auth/index.jsp?sessionExpired=true");
+            return;
+        }
+
         String action = request.getParameter("action");
         
         if (action == null) {
@@ -70,6 +79,16 @@ public class InvoiceServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Check session first
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        
+        if (user == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\":false,\"message\":\"Session expired\"}");
+            return;
+        }
+
         String action = request.getParameter("action");
         
         if (action == null) {
@@ -107,47 +126,58 @@ public class InvoiceServlet extends HttpServlet {
     private void listInvoices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Invoice> invoices = invoiceDAO.getAllInvoices();
         request.setAttribute("invoices", invoices);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/invoices.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
         dispatcher.forward(request, response);
     }
 
     private void viewInvoice(HttpServletRequest request, HttpServletResponse response) 
-    	    throws ServletException, IOException {
-    	    
-    	    try {
-    	        String idParam = request.getParameter("id");
-    	        if (idParam == null || idParam.isEmpty()) {
-    	            throw new ServletException("Invoice ID is required");
-    	        }
+            throws ServletException, IOException {
+            
+            try {
+                String idParam = request.getParameter("id");
+                if (idParam == null || idParam.isEmpty()) {
+                    request.setAttribute("errorMessage", "Invoice ID is required");
+                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    return;
+                }
 
-    	        int invoiceId = Integer.parseInt(idParam);
-    	        Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
-    	        if (invoice == null) {
-    	            throw new ServletException("Invoice not found with ID: " + invoiceId);
-    	        }
+                int invoiceId;
+                try {
+                    invoiceId = Integer.parseInt(idParam);
+                } catch (NumberFormatException e) {
+                    request.setAttribute("errorMessage", "Invalid Invoice ID format");
+                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    return;
+                }
 
-    	        List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
-    	        // Load products for each item
-    	        for (InvoiceItem item : items) {
-    	            Product product = productDAO.getProductById(item.getProductId());
-    	            item.setProduct(product);
-    	        }
+                Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
+                if (invoice == null) {
+                    request.setAttribute("errorMessage", "Invoice not found with ID: " + invoiceId);
+                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    return;
+                }
 
-    	        Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
-    	        
-    	        request.setAttribute("invoice", invoice);
-    	        request.setAttribute("items", items);
-    	        request.setAttribute("customer", customer);
-    	        
-    	        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
-    	        dispatcher.forward(request, response);
-    	        
-    	    } catch (NumberFormatException e) {
-    	        throw new ServletException("Invalid Invoice ID format", e);
-    	    } catch (Exception e) {
-    	        throw new ServletException("Error viewing invoice: " + e.getMessage(), e);
-    	    }
-    	}
+                List<InvoiceItem> items = invoiceItemDAO.getItemsByInvoiceId(invoiceId);
+                // Load products for each item
+                for (InvoiceItem item : items) {
+                    Product product = productDAO.getProductById(item.getProductId());
+                    item.setProduct(product);
+                }
+
+                Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
+                
+                request.setAttribute("invoice", invoice);
+                request.setAttribute("items", items);
+                request.setAttribute("customer", customer);
+                
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
+                dispatcher.forward(request, response);
+                
+            } catch (Exception e) {
+                request.setAttribute("errorMessage", "Error viewing invoice: " + e.getMessage());
+                request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+            }
+        }
 
     private void printInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int invoiceId = Integer.parseInt(request.getParameter("id"));
@@ -157,7 +187,7 @@ public class InvoiceServlet extends HttpServlet {
         // Load product for each item
         for (InvoiceItem item : items) {
             Product product = productDAO.getProductById(item.getProductId());
-            item.setProduct(product);  // This will now work
+            item.setProduct(product);
         }
         
         Customer customer = customerDAO.getCustomerById(invoice.getCustomerId());
@@ -189,13 +219,22 @@ public class InvoiceServlet extends HttpServlet {
     }
 
     private void createInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
         Gson gson = new Gson();
         Map<String, Object> responseData = new HashMap<>();
         Connection connection = null;
 
         try {
+            // Validate user session first
+            if (user == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                responseData.put("success", false);
+                responseData.put("message", "Session expired. Please log in again.");
+                response.getWriter().write(gson.toJson(responseData));
+                return;
+            }
+
             // Get a new connection for transaction
             connection = DBConnection.getConnection();
             if (connection == null) {
@@ -212,11 +251,6 @@ public class InvoiceServlet extends HttpServlet {
             int customerId = Integer.parseInt(request.getParameter("customerId"));
             double amountPaid = Double.parseDouble(request.getParameter("amountPaid"));
             String itemsJson = request.getParameter("items");
-
-            // Validate user session
-            if (user == null) {
-                throw new ServletException("User session expired");
-            }
 
             // Parse cart items
             List<CartItem> cartItems = gson.fromJson(itemsJson, new TypeToken<List<CartItem>>(){}.getType());
@@ -245,16 +279,12 @@ public class InvoiceServlet extends HttpServlet {
             invoice.setInvoiceDate(Timestamp.valueOf(LocalDateTime.now()));
 
             // Add invoice to database
-            InvoiceDAO invoiceDAO = new InvoiceDAO();
             int invoiceId = invoiceDAO.addInvoice(invoice, connection); // Pass connection
             if (invoiceId <= 0) {
                 throw new ServletException("Failed to create invoice");
             }
 
             // Add invoice items and update product quantities
-            InvoiceItemDAO invoiceItemDAO = new InvoiceItemDAO();
-            ProductDAO productDAO = new ProductDAO();
-            
             for (CartItem cartItem : cartItems) {
                 // Check product availability
                 Product product = productDAO.getProductById(cartItem.getProductId(), connection);
@@ -420,7 +450,6 @@ public class InvoiceServlet extends HttpServlet {
         }
     }
     
-    
     private void showSalesReport(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
@@ -475,44 +504,43 @@ public class InvoiceServlet extends HttpServlet {
         }
     }
 
-    	private void exportSalesToExcel(HttpServletRequest request, HttpServletResponse response) 
-    	    throws ServletException, IOException {
-    	    
-    	    try {
-    	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    	        java.util.Date startDate = dateFormat.parse(request.getParameter("startDate"));
-    	        java.util.Date endDate = dateFormat.parse(request.getParameter("endDate"));
-    	        
-    	        List<Invoice> invoices = invoiceDAO.getInvoicesByDateRange(startDate, endDate);
-    	        
-    	        response.setContentType("application/vnd.ms-excel");
-    	        response.setHeader("Content-Disposition", "attachment; filename=sales_report_" + 
-    	            dateFormat.format(startDate) + "_to_" + dateFormat.format(endDate) + ".xls");
-    	        
-    	        PrintWriter out = response.getWriter();
-    	        
-    	        // Excel header
-    	        out.println("Invoice ID\tDate\tCustomer ID\tSubtotal\tTotal\tAmount Paid\tBalance");
-    	        
-    	        // Excel data rows
-    	        for (Invoice invoice : invoices) {
-    	            out.println(
-    	                invoice.getInvoiceId() + "\t" +
-    	                invoice.getInvoiceDate() + "\t" +
-    	                invoice.getCustomerId() + "\t" +
-    	                invoice.getSubtotal() + "\t" +
-    	                invoice.getTotal() + "\t" +
-    	                invoice.getAmountPaid() + "\t" +
-    	                invoice.getBalance()
-    	            );
-    	        }
-    	        
-    	        out.close();
-    	    } catch (Exception e) {
-    	        throw new ServletException(e);
-    	    }
-    	}
-    	
+    private void exportSalesToExcel(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+            
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date startDate = dateFormat.parse(request.getParameter("startDate"));
+                java.util.Date endDate = dateFormat.parse(request.getParameter("endDate"));
+                
+                List<Invoice> invoices = invoiceDAO.getInvoicesByDateRange(startDate, endDate);
+                
+                response.setContentType("application/vnd.ms-excel");
+                response.setHeader("Content-Disposition", "attachment; filename=sales_report_" + 
+                    dateFormat.format(startDate) + "_to_" + dateFormat.format(endDate) + ".xls");
+                
+                PrintWriter out = response.getWriter();
+                
+                // Excel header
+                out.println("Invoice ID\tDate\tCustomer ID\tSubtotal\tTotal\tAmount Paid\tBalance");
+                
+                // Excel data rows
+                for (Invoice invoice : invoices) {
+                    out.println(
+                        invoice.getInvoiceId() + "\t" +
+                        invoice.getInvoiceDate() + "\t" +
+                        invoice.getCustomerId() + "\t" +
+                        invoice.getSubtotal() + "\t" +
+                        invoice.getTotal() + "\t" +
+                        invoice.getAmountPaid() + "\t" +
+                        invoice.getBalance()
+                    );
+                }
+                
+                out.close();
+            } catch (Exception e) {
+                throw new ServletException(e);
+            }
+        }
 }
 
 class CartItem {

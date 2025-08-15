@@ -89,7 +89,7 @@
             <div class="error-container">
                 <div class="alert alert-danger">
                     <h4>Error Loading Invoice</h4>
-                    <p>${requestScope['javax.servlet.error.message']}</p>
+                    <p>${not empty errorMessage ? errorMessage : 'Invoice details not found'}</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/InvoiceServlet?action=list" class="btn btn-primary">
                     Back to Sales List

@@ -40,6 +40,28 @@
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+    /* Custom chart styles */
+    .chart-container-1 {
+      position: relative;
+      height: 400px;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Ensure all chart text is clearly visible */
+    .chartjs-render-monitor text {
+      fill: #ffffff !important;
+      font-weight: 500;
+    }
+    
+    .card-header h5 {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  </style>
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -87,7 +109,7 @@
 	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
 	  </a>
 	</li>
-	
+	<li class="sidebar-header">REPORTS</li>
 	<li>
 	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
 	     class="<%= request.getRequestURI().endsWith("salesReport.jsp") ? "active" : "" %>">
@@ -226,23 +248,23 @@
       </div>
       
       <!-- Daily Sales Chart -->
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <h5>Daily Sales Summary</h5>
-            </div>
-            <div class="card-body">
-              <div class="chart-container-1">
-                <canvas id="dailySalesChart" height="100"></canvas>
-              </div>
-              <c:if test="${empty dailySales}">
-                <div class="alert alert-info mt-3">No sales data available for the selected date range.</div>
-              </c:if>
-            </div>
-          </div>
-        </div>
-      </div>
+        <div class="row">
+	    <div class="col-lg-12">
+	      <div class="card">
+	        <div class="card-header">
+	          <h5>Daily Sales Summary</h5>
+	        </div>
+	        <div class="card-body">
+	          <div class="chart-container-1">
+	            <canvas id="dailySalesChart" height="100"></canvas>
+	          </div>
+	          <c:if test="${empty dailySales}">
+	            <div class="alert alert-info mt-3">No sales data available for the selected date range.</div>
+	          </c:if>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
       
       <!-- Sales Details Table -->
       <div class="row">
@@ -426,9 +448,9 @@ $(document).ready(function() {
                     ${entry.value}<c:if test="${!loop.last}">,</c:if>
                 </c:forEach>
             ],
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
             fill: true
         }]
     };
@@ -441,49 +463,66 @@ $(document).ready(function() {
         window.dailySalesChart.destroy();
     }
     
-    // Create chart
+    // Create chart with improved visibility settings
     window.dailySalesChart = new Chart(ctx, {
         type: 'bar',
         data: dailySalesData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rs. ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        color: '#ffffff',
+                        font: {
+                            weight: 'bold'
+                        },
                         callback: function(value) {
                             return 'Rs. ' + value.toLocaleString();
                         }
                     },
                     grid: {
-                        display: true
+                        color: 'rgba(0,0,0,0.1)'
                     }
                 },
                 x: {
+                    ticks: {
+                        color: '#ffffff',
+                        font: {
+                            weight: 'bold'
+                        }
+                    },
                     grid: {
                         display: false
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            label += 'Rs. ' + context.parsed.y.toLocaleString();
-                            return label;
-                        }
                     }
                 }
             }
         }
     });
     </c:if>
-});
+  });
 </script>
 </body>
 </html>

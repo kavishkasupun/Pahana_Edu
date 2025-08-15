@@ -1,5 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="model.User" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect(request.getContextPath() + "/Auth/index.jsp?sessionExpired=true");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,10 +195,11 @@
       </li>
       <li class="sidebar-header">REPORTS</li>
       <li>
-        <a href="${pageContext.request.contextPath}/InvoiceServlet?action=list">
-          <i class="zmdi zmdi-receipt"></i> <span>Sales</span>
-        </a>
-      </li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+	     >
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
+	  </a>
+	</li>
     </ul>
   </div>
 
@@ -677,64 +686,107 @@ $(document).ready(function() {
         $('#printReceiptBtn').prop('disabled', !canComplete);
     }
     
+    function checkSession() {
+        $.ajax({
+            url: '${pageContext.request.contextPath}/CheckSessionServlet',
+            type: 'GET',
+            success: function(response) {
+                if (response === 'expired') {
+                    $('#sessionExpiredModal').modal('show');
+                }
+            },
+            error: function() {
+                console.log('Error checking session');
+            }
+        });
+    }
+
+    function redirectToLogin() {
+        window.location.href = '${pageContext.request.contextPath}/Auth/index.jsp?sessionExpired=true';
+    }
+
+    // Check session every 5 minutes (300000 ms)
+    setInterval(checkSession, 300000);
+
+    // Check session before completing sale
     function completeSale() {
-        Swal.fire({
-            title: 'Confirm Sale',
-            text: 'Are you sure you want to complete this sale?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, complete sale'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/InvoiceServlet',
-                    type: 'POST',
-                    data: {
-                        action: 'create',
-                        customerId: selectedCustomer.id,
-                        amountPaid: $('#amountPaid').val(),
-                        items: JSON.stringify(cart)
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            const invoiceId = response.invoiceId;
-                            const emailSent = response.emailSent;
-                            
-                            let successMessage = `Invoice #${invoiceId} has been created successfully.`;
-                            if (emailSent) {
-                                successMessage += "<br>Email receipt has been sent to the customer.";
-                            } else {
-                                successMessage += "<br>Failed to send email receipt.";
-                            }
-                            
-                            Swal.fire({
-                                title: 'Sale Completed!',
-                                html: successMessage,
-                                icon: 'success',
-                                showCancelButton: true,
-                                confirmButtonText: 'View Invoice',
-                                cancelButtonText: 'New Sale',
-                                allowOutsideClick: false
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = `${pageContext.request.contextPath}/InvoiceServlet?action=view&id=${invoiceId}`;
-                                } else {
-                                    resetSaleForm();
+        // First check session
+        $.ajax({
+            url: '${pageContext.request.contextPath}/CheckSessionServlet',
+            type: 'GET',
+            success: function(response) {
+                if (response === 'expired') {
+                    $('#sessionExpiredModal').modal('show');
+                } else {
+                    // Original complete sale code
+                    Swal.fire({
+                        title: 'Confirm Sale',
+                        text: 'Are you sure you want to complete this sale?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, complete sale'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '${pageContext.request.contextPath}/InvoiceServlet',
+                                type: 'POST',
+                                data: {
+                                    action: 'create',
+                                    customerId: selectedCustomer.id,
+                                    amountPaid: $('#amountPaid').val(),
+                                    items: JSON.stringify(cart)
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        const invoiceId = response.invoiceId;
+                                        const emailSent = response.emailSent;
+                                        
+                                        let successMessage = 'Invoice #' + invoiceId + ' has been created successfully.';
+                                        if (emailSent) {
+                                            successMessage += "<br>Email receipt has been sent to the customer.";
+                                        } else {
+                                            successMessage += "<br>Failed to send email receipt.";
+                                        }
+                                        
+                                        Swal.fire({
+                                            title: 'Sale Completed!',
+                                            html: successMessage,
+                                            icon: 'success',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'View Invoice',
+                                            cancelButtonText: 'New Sale',
+                                            allowOutsideClick: false
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                // Fixed URL construction
+                                                window.location.href = '${pageContext.request.contextPath}/InvoiceServlet?action=view&id=' + invoiceId;
+                                            } else {
+                                                resetSaleForm();
+                                            }
+                                        });
+                                        
+                                        printReceipt(invoiceId);
+                                    } else {
+                                        Swal.fire('Error', response.message || 'Failed to complete sale', 'error');
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    if (xhr.status === 401) {
+                                        $('#sessionExpiredModal').modal('show');
+                                    } else {
+                                        console.error(error);
+                                        Swal.fire('Error', 'Failed to complete sale: ' + error, 'error');
+                                    }
                                 }
                             });
-                            
-                            printReceipt(invoiceId);
-                        } else {
-                            Swal.fire('Error', response.message || 'Failed to complete sale', 'error');
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(error);
-                        Swal.fire('Error', 'Failed to complete sale: ' + error, 'error');
-                    }
-                });
+                    });
+                }
+            },
+            error: function() {
+                console.log('Error checking session');
             }
         });
     }
@@ -864,5 +916,25 @@ $(document).ready(function() {
     }
 });
 </script>
+
+<div class="modal fade" id="sessionExpiredModal" tabindex="-1" role="dialog" aria-labelledby="sessionExpiredModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="sessionExpiredModalLabel">Session Expired</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Your session has expired. Please log in again to continue.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="redirectToLogin()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

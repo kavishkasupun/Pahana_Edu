@@ -84,7 +84,7 @@
 	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
 	  </a>
 	</li>
-	
+	<li class="sidebar-header">REPORTS</li>
 	<li>
 	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
 	     >
