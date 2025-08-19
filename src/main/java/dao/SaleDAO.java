@@ -1,10 +1,13 @@
 package dao;
 
+import model.Invoice;
 import model.Sale;
 import model.SaleItem;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SaleDAO {
     private Connection connection;
@@ -131,5 +134,59 @@ public class SaleDAO {
             e.printStackTrace();
         }
         return sales;
+    }
+    
+    public double getTotalSalesAmount() {
+        String sql = "SELECT SUM(total) FROM invoices";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Map<String, Double> getRecentSales(int days) {
+        Map<String, Double> salesMap = new LinkedHashMap<>();
+        String sql = "SELECT DATE(invoice_date) as sale_date, SUM(total) as daily_total " +
+                     "FROM invoices " +
+                     "WHERE invoice_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                     "GROUP BY DATE(invoice_date) " +
+                     "ORDER BY sale_date";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, days);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                salesMap.put(rs.getString("sale_date"), rs.getDouble("daily_total"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return salesMap;
+    }
+
+    public List<Invoice> getRecentInvoices(int limit) {
+        List<Invoice> invoices = new ArrayList<>();
+        String sql = "SELECT * FROM invoices ORDER BY invoice_date DESC LIMIT ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, limit);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Invoice invoice = new Invoice();
+                invoice.setInvoiceId(rs.getInt("invoice_id"));
+                invoice.setCustomerId(rs.getInt("customer_id"));
+                invoice.setInvoiceDate(rs.getTimestamp("invoice_date"));
+                invoice.setTotal(rs.getDouble("total"));
+                invoices.add(invoice);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
     }
 }

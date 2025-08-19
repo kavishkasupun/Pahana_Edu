@@ -11,6 +11,11 @@ public class CategoryDAO {
     public CategoryDAO() {
         this.connection = DBConnection.getConnection();
     }
+    
+    // Constructor for testing: inject connection
+    public CategoryDAO(Connection connection) {
+        this.connection = connection;
+    }
 
     // Add a new category
     public boolean addCategory(Category category) {

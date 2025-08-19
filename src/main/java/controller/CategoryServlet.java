@@ -16,10 +16,18 @@ public class CategoryServlet extends HttpServlet {
     public void init() {
         categoryDAO = new CategoryDAO();
     }
+    
+ // Add this setter for testing
+    protected void setCategoryDAO(CategoryDAO categoryDAO) {
+        this.categoryDAO = categoryDAO;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        if (action == null) {
+            action = "list"; // default action
+        }
         
         try {
             switch (action) {

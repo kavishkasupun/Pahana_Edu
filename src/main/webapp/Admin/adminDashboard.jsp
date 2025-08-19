@@ -1,4 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="java.util.*, java.text.*" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="model.User" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +15,7 @@
   
   <!-- loader-->
   <link href="${pageContext.request.contextPath}/assets/css/pace.min.css" rel="stylesheet"/>
-  <script src="${pageContext.request.contextPath}/assets/js/pace.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   
   <!-- Vector CSS -->
   <link href="${pageContext.request.contextPath}/assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" rel="stylesheet"/>
@@ -37,6 +40,28 @@
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Custom chart styles */
+    .chart-container-1 {
+      position: relative;
+      height: 400px;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Ensure all chart text is clearly visible */
+    .chartjs-render-monitor text {
+      fill: #ffffff !important;
+      font-weight: 500;
+    }
+    
+    .card-header h5 {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  </style>
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -56,7 +81,7 @@
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp" class="active">
+        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp" class="<%= request.getRequestURI().endsWith("adminDashboard.jsp") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
@@ -68,12 +93,12 @@
       </li>
       
       <li>
-		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list">
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
 		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
 		 </a>
 	 </li>
 
-     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %> ">
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
 	    <a href="accounts.jsp">
 	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
 	    </a>
@@ -87,7 +112,7 @@
 	<li class="sidebar-header">REPORTS</li>
 	<li>
 	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
-	     >
+	     class="<%= request.getRequestURI().endsWith("salesReport.jsp") ? "active" : "" %>">
 	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
 	  </a>
 	</li>
@@ -180,52 +205,123 @@
   <div class="content-wrapper">
     <div class="container-fluid">
       <!--Start Dashboard Content-->
-      <!-- In the dashboard content section, replace the card content with: -->
-		<div class="card mt-3">
-	    <div class="card-content">
-	        <div class="row row-group m-0">
-	            <div class="col-12 col-lg-6 col-xl-3 border-light">
-	                <div class="card-body">
-	                    <h5 class="text-white mb-0">${productCount} <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
-	                    <div class="progress my-3" style="height:3px;">
-	                        <div class="progress-bar" style="width:55%"></div>
-	                    </div>
-	                    <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-	                </div>
-	            </div>
-	            <div class="col-12 col-lg-6 col-xl-3 border-light">
-	                <div class="card-body">
-	                    <h5 class="text-white mb-0">${lowStockCount} <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
-	                    <div class="progress my-3" style="height:3px;">
-	                        <div class="progress-bar" style="width:55%"></div>
-	                    </div>
-	                    <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-	                </div>
-	            </div>
-	            <div class="col-12 col-lg-6 col-xl-3 border-light">
-	                <div class="card-body">
-	                    <h5 class="text-white mb-0">${outOfStockCount} <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
-	                    <div class="progress my-3" style="height:3px;">
-	                        <div class="progress-bar" style="width:55%"></div>
-	                    </div>
-	                    <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-	                </div>
-	            </div>
-	            <div class="col-12 col-lg-6 col-xl-3 border-light">
-	                <div class="card-body">
-	                    <h5 class="text-white mb-0">${salesCount} <span class="float-right"><i class="fa fa-chart-line"></i></span></h5>
-	                    <div class="progress my-3" style="height:3px;">
-	                        <div class="progress-bar" style="width:55%"></div>
-	                    </div>
-	                    <p class="mb-0 text-white small-font">Total Sales <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</div>
+      <div class="card mt-3">
+        <div class="card-content">
+          <div class="row row-group m-0">
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0">${productCount} <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0">${lowStockCount} <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0">${outOfStockCount} <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0">
+                  <fmt:formatNumber value="${totalSalesAmount}" type="currency" currencySymbol="Rs. "/>
+                  <span class="float-right"><i class="fa fa-chart-line"></i></span>
+                </h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">
+                  Total Sales (${salesCount} transactions)
+                  <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <!-- Rest of your dashboard content remains the same -->
-      <!-- ... -->
+      <!-- Sales Chart -->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header">
+              <h5>Recent Sales Performance</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container-1">
+                <canvas id="salesChart" height="100"></canvas>
+              </div>
+              <c:if test="${empty recentSales}">
+                <div class="alert alert-info mt-3">No recent sales data available.</div>
+              </c:if>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent Sales Table -->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header">
+              <h5>Recent Sales</h5>
+            </div>
+            <div class="card-body">
+              <c:choose>
+                <c:when test="${not empty recentInvoices}">
+                  <div class="table-responsive">
+                    <table id="recentSalesTable" class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Invoice ID</th>
+                          <th>Date</th>
+                          <th>Customer</th>
+                          <th>Items</th>
+                          <th>Total (Rs.)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <c:forEach items="${recentInvoices}" var="invoice">
+                          <tr>
+                            <td>${invoice.invoiceId}</td>
+                            <td><fmt:formatDate value="${invoice.invoiceDate}" pattern="yyyy-MM-dd HH:mm" /></td>
+                            <td>
+                              <c:set var="customer" value="${customerDAO.getCustomerById(invoice.customerId)}" />
+                              ${customer.name}
+                            </td>
+                            <td>
+                              <c:set var="items" value="${invoiceItemDAO.getItemsByInvoiceId(invoice.invoiceId)}" />
+                              ${items.size()} items
+                            </td>
+                            <td><fmt:formatNumber value="${invoice.total}" type="currency" currencySymbol="Rs. "/></td>
+                          </tr>
+                        </c:forEach>
+                      </tbody>
+                    </table>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="alert alert-info">No recent sales found.</div>
+                </c:otherwise>
+              </c:choose>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <!--End Dashboard Content-->
       
@@ -234,41 +330,37 @@
       <!--end overlay-->
     </div>
     <!-- End container-fluid-->
-      <div class="right-sidebar">
-    <div class="switcher-icon">
-      <i class="zmdi zmdi-settings zmdi-hc-spin"></i>
+    
+    <div class="right-sidebar">
+      <div class="switcher-icon">
+        <i class="zmdi zmdi-settings zmdi-hc-spin"></i>
+      </div>
+      <div class="right-sidebar-content">
+        <p class="mb-0">Gaussion Texture</p>
+        <hr>
+        <ul class="switcher">
+          <li id="theme1"></li>
+          <li id="theme2"></li>
+          <li id="theme3"></li>
+          <li id="theme4"></li>
+          <li id="theme5"></li>
+          <li id="theme6"></li>
+        </ul>
+        <p class="mb-0">Gradient Background</p>
+        <hr>
+        <ul class="switcher">
+          <li id="theme7"></li>
+          <li id="theme8"></li>
+          <li id="theme9"></li>
+          <li id="theme10"></li>
+          <li id="theme11"></li>
+          <li id="theme12"></li>
+          <li id="theme13"></li>
+          <li id="theme14"></li>
+          <li id="theme15"></li>
+        </ul>
+      </div>
     </div>
-    <div class="right-sidebar-content">
-
-      <p class="mb-0">Gaussion Texture</p>
-      <hr>
-      
-      <ul class="switcher">
-        <li id="theme1"></li>
-        <li id="theme2"></li>
-        <li id="theme3"></li>
-        <li id="theme4"></li>
-        <li id="theme5"></li>
-        <li id="theme6"></li>
-      </ul>
-
-      <p class="mb-0">Gradient Background</p>
-      <hr>
-      
-      <ul class="switcher">
-        <li id="theme7"></li>
-        <li id="theme8"></li>
-        <li id="theme9"></li>
-        <li id="theme10"></li>
-        <li id="theme11"></li>
-        <li id="theme12"></li>
-		<li id="theme13"></li>
-        <li id="theme14"></li>
-        <li id="theme15"></li>
-      </ul>
-      
-     </div>
-   </div>
   </div><!--End content-wrapper-->
   
   <!--Start Back To Top Button-->
@@ -298,9 +390,115 @@
   <script src="${pageContext.request.contextPath}/assets/js/jquery.loading-indicator.js"></script>
   <!-- Custom scripts -->
   <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
-  <!-- Chart js -->
-  <script src="${pageContext.request.contextPath}/assets/plugins/Chart.js/Chart.min.js"></script>
-  <!-- Index js -->
-  <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+  <script>
+  $(document).ready(function() {
+      // Initialize DataTable if we have invoices
+      <c:if test="${not empty recentInvoices}">
+      $('#recentSalesTable').DataTable({
+          "order": [[1, "desc"]],
+          "language": {
+              "emptyTable": "No recent sales data available"
+          },
+          "dom": '<"top"lf>rt<"bottom"ip><"clear">',
+          "responsive": true
+      });
+      </c:if>
+      
+      // Initialize chart only if we have data
+      <c:if test="${not empty recentSales}">
+      // Prepare data for chart
+      var salesChartData = {
+          labels: [
+              <c:forEach items="${recentSales}" var="entry" varStatus="loop">
+                  "${entry.key}"<c:if test="${!loop.last}">,</c:if>
+              </c:forEach>
+          ],
+          datasets: [{
+              label: 'Sales Amount (Rs.)',
+              data: [
+                  <c:forEach items="${recentSales}" var="entry" varStatus="loop">
+                      ${entry.value}<c:if test="${!loop.last}">,</c:if>
+                  </c:forEach>
+              ],
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 2,
+              fill: true
+          }]
+      };
+      
+      // Get chart canvas
+      var ctx = document.getElementById('salesChart').getContext('2d');
+      
+      // Destroy previous chart instance if exists
+      if (window.salesChart instanceof Chart) {
+          window.salesChart.destroy();
+      }
+      
+      // Create chart with improved visibility settings
+      window.salesChart = new Chart(ctx, {
+          type: 'line',
+          data: salesChartData,
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      labels: {
+                          color: '#ffffff',
+                          font: {
+                              size: 14,
+                              weight: 'bold'
+                          }
+                      }
+                  },
+                  tooltip: {
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      titleColor: '#ffffff',
+                      bodyColor: '#ffffff',
+                      callbacks: {
+                          label: function(context) {
+                              return 'Rs. ' + context.parsed.y.toLocaleString();
+                          }
+                      }
+                  }
+              },
+              scales: {
+                  y: {
+                      beginAtZero: true,
+                      ticks: {
+                          color: '#ffffff',
+                          font: {
+                              weight: 'bold'
+                          },
+                          callback: function(value) {
+                              return 'Rs. ' + value.toLocaleString();
+                          }
+                      },
+                      grid: {
+                          color: 'rgba(0,0,0,0.1)'
+                      }
+                  },
+                  x: {
+                      ticks: {
+                          color: '#ffffff',
+                          font: {
+                              weight: 'bold'
+                          }
+                      },
+                      grid: {
+                          display: false
+                      }
+                  }
+              }
+          }
+      });
+      </c:if>
+  });
+  </script>
 </body>
 </html>

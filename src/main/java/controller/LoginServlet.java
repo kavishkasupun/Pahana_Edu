@@ -17,12 +17,18 @@ import util.EmailUtility;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
+    private UserDAO userDAO = new UserDAO();
+
+    public void setUserDAO(UserDAO dao) { // for testing
+        this.userDAO = dao;
+    }
+    
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String usernameOrEmail = req.getParameter("username");
         String password = req.getParameter("password");
 
         UserDAO dao = new UserDAO();
-        User user = dao.checkLogin(usernameOrEmail, password);
+        User user = userDAO.checkLogin(usernameOrEmail, password);
 
         if(user != null) {
             HttpSession session = req.getSession();

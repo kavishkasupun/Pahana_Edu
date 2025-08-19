@@ -159,4 +159,62 @@ public class InvoiceDAO {
         return 0;
     }
     
+    public List<Invoice> getRecentInvoices(int limit) {
+        List<Invoice> invoices = new ArrayList<>();
+        String sql = "SELECT * FROM invoices ORDER BY invoice_date DESC LIMIT ?";
+        
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, limit);
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    invoices.add(mapResultSetToInvoice(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting recent invoices: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+        return invoices;
+    }
+
+    public double getTotalSalesAmount() {
+        String sql = "SELECT SUM(total) AS totalAmount FROM invoices";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getDouble("totalAmount");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting total sales amount: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+        return 0.0;
+    }
+
+    public Map<String, Double> getRecentSales(int days) {
+        Map<String, Double> recentSales = new LinkedHashMap<>();
+        String sql = "SELECT DATE(invoice_date) as sale_date, SUM(total) as daily_total " +
+                     "FROM invoices WHERE invoice_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                     "GROUP BY DATE(invoice_date) ORDER BY sale_date";
+        
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, days);
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    recentSales.put(
+                        resultSet.getString("sale_date"),
+                        resultSet.getDouble("daily_total")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting recent sales: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage(), e);
+        }
+        return recentSales;
+    }
+
+    
 }

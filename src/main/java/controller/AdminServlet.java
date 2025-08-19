@@ -1,6 +1,7 @@
 package controller;
 
 import dao.ProductDAO;
+import model.Invoice;
 import dao.InvoiceDAO;
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -8,6 +9,7 @@ import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 @WebServlet(name = "AdminServlet", value = "/AdminServlet")
 public class AdminServlet extends HttpServlet {
@@ -38,11 +40,23 @@ public class AdminServlet extends HttpServlet {
             // 4. Total Sales Count
             counts.put("salesCount", invoiceDAO.getTotalSalesCount());
             
+            // 5. Total Sales Amount
+            double totalSalesAmount = invoiceDAO.getTotalSalesAmount();
+            
+            // 6. Recent Sales Data (last 7 days)
+            Map<String, Double> recentSales = invoiceDAO.getRecentSales(7);
+            
+            // 7. Recent Invoices (last 10)
+            List<Invoice> recentInvoices = invoiceDAO.getRecentInvoices(10);
+            
             // Set all attributes
             request.setAttribute("productCount", counts.get("productCount"));
             request.setAttribute("lowStockCount", counts.get("lowStockCount"));
             request.setAttribute("outOfStockCount", counts.get("outOfStockCount"));
             request.setAttribute("salesCount", counts.get("salesCount"));
+            request.setAttribute("totalSalesAmount", totalSalesAmount);
+            request.setAttribute("recentSales", recentSales);
+            request.setAttribute("recentInvoices", recentInvoices);
             
             // Forward to adminDashboard.jsp
             RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/adminDashboard.jsp");
