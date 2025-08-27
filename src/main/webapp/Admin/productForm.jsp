@@ -19,6 +19,9 @@
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
   <style>
     .image-preview {
       max-width: 200px;
@@ -89,11 +92,7 @@
               <h4 class="card-title">${not empty product ? 'Edit' : 'Add'} Product</h4>
             </div>
             <div class="card-body">
-              <c:if test="${not empty error}">
-                <div class="alert alert-danger">${error}</div>
-              </c:if>
-              
-              <form action="${pageContext.request.contextPath}/ProductServlet?action=${not empty product ? 'update' : 'insert'}" method="post" enctype="multipart/form-data">
+              <form action="${pageContext.request.contextPath}/ProductServlet?action=${not empty product ? 'update' : 'insert'}" method="post" enctype="multipart/form-data" id="productForm">
                 <c:if test="${not empty product}">
                   <input type="hidden" name="id" value="${product.productId}">
                 </c:if>
@@ -181,6 +180,9 @@
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 // Image preview functionality
 document.getElementById('image').addEventListener('change', function(event) {
@@ -196,20 +198,42 @@ document.getElementById('image').addEventListener('change', function(event) {
     }
 });
 
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
+// Form validation and success message
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Basic validation
+    const productName = document.getElementById('productName').value.trim();
+    const categoryId = document.getElementById('categoryId').value;
     const price = parseFloat(document.getElementById('price').value);
     const quantity = parseInt(document.getElementById('quantity').value);
     
+    if (!productName || !categoryId || isNaN(price) || isNaN(quantity)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please fill all required fields',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        return;
+    }
+    
     if (price < 0) {
-        alert('Price cannot be negative');
-        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Price',
+            text: 'Price cannot be negative'
+        });
         return;
     }
     
     if (quantity < 0) {
-        alert('Quantity cannot be negative');
-        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Quantity',
+            text: 'Quantity cannot be negative'
+        });
         return;
     }
     
@@ -218,12 +242,51 @@ document.querySelector('form').addEventListener('submit', function(e) {
         const file = fileInput.files[0];
         const fileSize = file.size / 1024 / 1024; // in MB
         if (fileSize > 10) {
-            alert('File size exceeds 10MB limit');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'File size exceeds 10MB limit'
+            });
             return;
         }
     }
+    
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: '${not empty product ? "Update" : "Add"} this product?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, ${not empty product ? "update" : "add"} it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading message
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we save your product',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+            
+            // Submit the form
+            this.submit();
+        }
+    });
 });
+
+// Check for error message from session and show SweetAlert
+<c:if test="${not empty sessionScope.errorMessage}">
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '${sessionScope.errorMessage}'
+    });
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
 </script>
 </body>
 </html>

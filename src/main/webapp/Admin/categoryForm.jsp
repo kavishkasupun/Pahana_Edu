@@ -17,6 +17,9 @@
   <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -63,7 +66,7 @@
               <h4 class="card-title"><%= request.getParameter("id") != null ? "Edit" : "Add" %> Category</h4>
             </div>
             <div class="card-body">
-              <form action="${pageContext.request.contextPath}/CategoryServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
+              <form id="categoryForm" action="${pageContext.request.contextPath}/CategoryServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
                 <% if (request.getParameter("id") != null) { %>
                 <input type="hidden" name="id" value="<%= request.getParameter("id") %>">
                 <% } %>
@@ -112,5 +115,46 @@
 <script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+<script>
+// Form validation and confirmation
+$(document).ready(function() {
+    $('#categoryForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Basic validation
+        var categoryName = $('#name').val().trim();
+        if (categoryName === '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Category name is required!'
+            });
+            return false;
+        }
+        
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: '<%= request.getParameter("id") != null ? "Update" : "Add" %> this category?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, <%= request.getParameter("id") != null ? "update" : "add" %> it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If confirmed, submit the form
+                this.submit();
+            }
+        });
+        
+        return false;
+    });
+});
+</script>
 </body>
 </html>

@@ -13,12 +13,63 @@
         .text-right { text-align: right; }
         .action-buttons { margin-top: 20px; }
         .error-container { max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .action-buttons, .no-print {
+                display: none !important;
+            }
+            .invoice-container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            .invoice-header {
+                border-bottom: 2px solid #000;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            .customer-details {
+                margin-bottom: 20px;
+                padding: 10px;
+                border: 1px solid #ddd;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f8f9fa;
+            }
+            .text-right {
+                text-align: right;
+            }
+        }
     </style>
 </head>
 <body>
     <c:choose>
         <c:when test="${not empty invoice and not empty items and not empty customer}">
-            <div class="invoice-container">
+            <div class="invoice-container print-section">
                 <div class="invoice-header">
                     <h2>Pahana Edu</h2>
                     <h3>Invoice #${invoice.invoiceId}</h3>
@@ -69,19 +120,27 @@
                     </tfoot>
                 </table>
                 
-                <div class="action-buttons">
-                    <a href="${pageContext.request.contextPath}/InvoiceServlet?action=print&id=${invoice.invoiceId}" 
-                       class="btn btn-primary" target="_blank">
-                        <i class="fa fa-print"></i> Print Invoice
-                    </a>
-                    <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new" 
-                       class="btn btn-success">
-                        <i class="fa fa-plus"></i> New Sale
-                    </a>
-                    <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
-                       class="btn btn-secondary">
-                        <i class="fa fa-list"></i> View All Sales
-                    </a>
+                <div class="text-center mt-4">
+                    <p>Thank you for your business!</p>
+                    <p>Pahana Edu - Quality Education Materials</p>
+                </div>
+            </div>
+            
+            <div class="container action-buttons no-print">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <button onclick="printInvoice()" class="btn btn-primary">
+                            <i class="fa fa-print"></i> Print Invoice
+                        </button>
+                        <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new" 
+                           class="btn btn-success">
+                            <i class="fa fa-plus"></i> New Sale
+                        </a>
+                        <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+                           class="btn btn-secondary">
+                            <i class="fa fa-list"></i> View All Sales
+                        </a>
+                    </div>
                 </div>
             </div>
         </c:when>
@@ -100,5 +159,15 @@
     
     <script src="${pageContext.request.contextPath}/assets/js/jquery.min.js"></script>
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
+    <script>
+        function printInvoice() {
+            window.print();
+        }
+        
+        // Auto-print if print parameter is in URL
+        if(window.location.search.includes('print=true')) {
+            window.print();
+        }
+    </script>
 </body>
 </html>

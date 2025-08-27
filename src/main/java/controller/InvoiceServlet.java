@@ -126,7 +126,7 @@ public class InvoiceServlet extends HttpServlet {
     private void listInvoices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Invoice> invoices = invoiceDAO.getAllInvoices();
         request.setAttribute("invoices", invoices);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/printInvoice.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -137,7 +137,7 @@ public class InvoiceServlet extends HttpServlet {
                 String idParam = request.getParameter("id");
                 if (idParam == null || idParam.isEmpty()) {
                     request.setAttribute("errorMessage", "Invoice ID is required");
-                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Admin/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
@@ -146,14 +146,14 @@ public class InvoiceServlet extends HttpServlet {
                     invoiceId = Integer.parseInt(idParam);
                 } catch (NumberFormatException e) {
                     request.setAttribute("errorMessage", "Invalid Invoice ID format");
-                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Admin/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
                 Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
                 if (invoice == null) {
                     request.setAttribute("errorMessage", "Invoice not found with ID: " + invoiceId);
-                    request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Admin/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
@@ -170,12 +170,12 @@ public class InvoiceServlet extends HttpServlet {
                 request.setAttribute("items", items);
                 request.setAttribute("customer", customer);
                 
-                RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/viewInvoice.jsp");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/printInvoice.jsp");
                 dispatcher.forward(request, response);
                 
             } catch (Exception e) {
                 request.setAttribute("errorMessage", "Error viewing invoice: " + e.getMessage());
-                request.getRequestDispatcher("/Admin/viewInvoice.jsp").forward(request, response);
+                request.getRequestDispatcher("/Admin/printInvoice.jsp").forward(request, response);
             }
         }
 

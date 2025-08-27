@@ -72,7 +72,7 @@
   <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
-      <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+      <a href="${pageContext.request.contextPath}/AdminServlet">
         <img src="${pageContext.request.contextPath}/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
@@ -81,7 +81,7 @@
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp" class="<%= request.getRequestURI().endsWith("adminDashboard.jsp") ? "active" : "" %>">
+        <a href="${pageContext.request.contextPath}/AdminServlet" class="<%= request.getRequestURI().endsWith("/AdminServlet") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
@@ -99,7 +99,7 @@
 	 </li>
 
      <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
-	    <a href="accounts.jsp">
+	    <a href="${pageContext.request.contextPath}/Admin/accounts.jsp">
 	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
 	    </a>
 	</li>
@@ -116,6 +116,7 @@
 	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
 	  </a>
 	</li>
+	
 
       <li class="sidebar-header">SETTINGS</li>
       <li>

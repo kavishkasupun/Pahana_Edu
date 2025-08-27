@@ -32,8 +32,14 @@ public class UserManagementServlet extends HttpServlet {
                 case "new":
                     showNewForm(request, response);
                     break;
+                case "edit":
+                    showEditForm(request, response);
+                    break;
                 case "insert":
                     insertUser(request, response);
+                    break;
+                case "update":
+                    updateUser(request, response);
                     break;
                 case "delete":
                     deleteUser(request, response);
@@ -58,6 +64,13 @@ public class UserManagementServlet extends HttpServlet {
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/Admin/userForm.jsp").forward(request, response);
+    }
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        User existingUser = userDAO.getUserById(id);
+        request.setAttribute("user", existingUser);
         request.getRequestDispatcher("/Admin/userForm.jsp").forward(request, response);
     }
 
@@ -91,9 +104,32 @@ public class UserManagementServlet extends HttpServlet {
             
             EmailUtility.sendEmail(user.getEmail(), "Your Pahana Edu Account - Set Your Password", emailContent);
             
+            request.getSession().setAttribute("successMessage", "User added successfully! Password reset email sent.");
             response.sendRedirect("UserManagementServlet?action=list");
         } else {
             throw new Exception("Could not insert user");
+        }
+    }
+
+    private void updateUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        int id = Integer.parseInt(request.getParameter("id"));
+        User user = new User();
+        user.setId(id);
+        user.setUsername(request.getParameter("username"));
+        user.setEmail(request.getParameter("email"));
+        user.setRole(request.getParameter("role"));
+        
+        // Only update password if provided
+        String password = request.getParameter("password");
+        if (password != null && !password.trim().isEmpty()) {
+            user.setPassword(password);
+        }
+        
+        if (userDAO.updateUser(user)) {
+            request.getSession().setAttribute("successMessage", "User updated successfully!");
+            response.sendRedirect("UserManagementServlet?action=list");
+        } else {
+            throw new Exception("Could not update user");
         }
     }
 
@@ -101,6 +137,7 @@ public class UserManagementServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         
         if (userDAO.deleteUser(id)) {
+            request.getSession().setAttribute("successMessage", "User deleted successfully!");
             response.sendRedirect("UserManagementServlet?action=list");
         } else {
             throw new Exception("Could not delete user");

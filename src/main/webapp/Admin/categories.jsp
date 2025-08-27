@@ -22,6 +22,9 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"/>
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css"/>
   
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
   <style>
     .dataTables_wrapper .dataTables_filter input {
       border: 1px solid #dee2e6;
@@ -52,29 +55,64 @@
 <body class="bg-theme bg-theme1">
  
 <div id="wrapper">
-  <!-- Same sidebar as adminDashboard -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
-      <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+      <a href="${pageContext.request.contextPath}/AdminServlet">
         <img src="${pageContext.request.contextPath}/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/AdminServlet" class="<%= request.getRequestURI().endsWith("/AdminServlet") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
-        <a href="${pageContext.request.contextPath}/CategoryServlet?action=list" class="active">
+        <a href="${pageContext.request.contextPath}/CategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
-      <!-- Other menu items -->
+      
+      <li>
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/Admin/accounts.jsp">
+	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	<li class="sidebar-header">REPORTS</li>
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+	     class="<%= request.getRequestURI().endsWith("salesReport.jsp") ? "active" : "" %>">
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
+	  </a>
+	</li>
+	
+
+      <li class="sidebar-header">SETTINGS</li>
+      <li>
+        <a href="${pageContext.request.contextPath}/Auth/index.jsp">
+          <i class="zmdi zmdi-power"></i> <span>Logout</span>
+        </a>
+      </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
@@ -127,7 +165,7 @@
                         </a>
                         <a href="${pageContext.request.contextPath}/CategoryServlet?action=delete&id=<%= category.getCategoryId() %>" 
                            class="btn btn-sm btn-danger" 
-                           onclick="return confirm('Are you sure you want to delete this category?')">
+                           onclick="return confirmDelete(event, this.href)">
                           <i class="fa fa-trash"></i>
                         </a>
                       </td>
@@ -172,8 +210,40 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
 <script>
 $(document).ready(function() {
+    // Check for success or error messages and show SweetAlert
+    <% 
+    String successMessage = (String) session.getAttribute("successMessage");
+    String errorMessage = (String) session.getAttribute("errorMessage");
+    
+    if (successMessage != null) { 
+        session.removeAttribute("successMessage");
+    %>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '<%= successMessage %>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    <% } %>
+    
+    <% if (errorMessage != null) { 
+        session.removeAttribute("errorMessage");
+    %>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '<%= errorMessage %>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    <% } %>
+    
     $('#categoriesTable').DataTable({
         responsive: true,
         dom: '<"top"lf>rt<"bottom"ip><"clear">',
@@ -242,6 +312,27 @@ $(document).ready(function() {
         }
     });
 });
+
+// Custom delete confirmation with SweetAlert
+function confirmDelete(event, url) {
+    event.preventDefault();
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+    
+    return false;
+}
 </script>
 </body>
 </html>

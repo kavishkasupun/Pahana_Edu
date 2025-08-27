@@ -1,11 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.User" %>
+<%
+    User user = (User) request.getAttribute("user");
+    boolean isEditMode = user != null;
+    String pageTitle = isEditMode ? "Edit Staff Member" : "Add Staff Member";
+    String formAction = isEditMode ? 
+        request.getContextPath() + "/UserManagementServlet?action=update&id=" + user.getId() : 
+        request.getContextPath() + "/UserManagementServlet?action=insert";
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-  <title>Pahana Edu - Add Staff Member</title>
+  <title>Pahana Edu - <%= pageTitle %></title>
   
   <!-- Same styles as adminDashboard -->
   <link href="${pageContext.request.contextPath}/assets/css/pace.min.css" rel="stylesheet"/>
@@ -16,6 +25,9 @@
   <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -73,36 +85,39 @@
         <div class="col-12 col-lg-6 mx-auto">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Add Staff Member</h4>
+              <h4 class="card-title"><%= pageTitle %></h4>
             </div>
             <div class="card-body">
-              <form action="${pageContext.request.contextPath}/UserManagementServlet?action=insert" method="post">
+              <form action="<%= formAction %>" method="post" id="userForm">
                 <div class="form-group">
                   <label for="username">Username</label>
-                  <input type="text" class="form-control" id="username" name="username" required>
+                  <input type="text" class="form-control" id="username" name="username" 
+                         value="<%= isEditMode ? user.getUsername() : "" %>" required>
                 </div>
                 
                 <div class="form-group">
                   <label for="email">Email</label>
-                  <input type="email" class="form-control" id="email" name="email" required>
+                  <input type="email" class="form-control" id="email" name="email" 
+                         value="<%= isEditMode ? user.getEmail() : "" %>" required>
                 </div>
                 
                 <div class="form-group">
-                  <label for="password">Password</label>
-                  <input type="password" class="form-control" id="password" name="password" required>
+                  <label for="password">Password <%= isEditMode ? "(Leave blank to keep current password)" : "" %></label>
+                  <input type="password" class="form-control" id="password" name="password" 
+                         <%= isEditMode ? "" : "required" %>>
                 </div>
                 
                 <div class="form-group">
                   <label for="role">Role</label>
                   <select class="form-control" id="role" name="role" required>
-                    <option value="cashier">Cashier</option>
-                    <option value="admin">Admin</option>
+                    <option value="cashier" <%= isEditMode && "cashier".equals(user.getRole()) ? "selected" : "" %>>Cashier</option>
+                    <option value="admin" <%= isEditMode && "admin".equals(user.getRole()) ? "selected" : "" %>>Admin</option>
                   </select>
                 </div>
                 
                 <div class="form-group text-center">
                   <button type="submit" class="btn btn-primary mr-2">
-                    <i class="fa fa-save"></i> Save
+                    <i class="fa fa-save"></i> <%= isEditMode ? "Update" : "Save" %>
                   </button>
                   <a href="${pageContext.request.contextPath}/UserManagementServlet?action=list" class="btn btn-light">
                     <i class="fa fa-times"></i> Cancel
@@ -133,5 +148,42 @@
 <script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Show success message if exists
+    <% 
+    String successMessage = (String) session.getAttribute("successMessage");
+    if (successMessage != null) { 
+        session.removeAttribute("successMessage");
+    %>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '<%= successMessage %>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    <% } %>
+    
+    // Form validation
+    $('#userForm').on('submit', function(e) {
+        var password = $('#password').val();
+        var isEditMode = <%= isEditMode %>;
+        
+        if (!isEditMode && (password === '' || password.length < 6)) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Password is required and must be at least 6 characters long'
+            });
+        }
+    });
+});
+</script>
 </body>
 </html>

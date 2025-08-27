@@ -198,4 +198,73 @@ public class UserDAO {
             closeConnection(con);
         }
     }
+    
+    public User getUserById(int id) {
+        User user = null;
+        String sql = "SELECT * FROM users WHERE id=?";
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            con = getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                user = new User();
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setPassword(rs.getString("password"));
+                user.setRole(rs.getString("role"));
+                user.setVerified(rs.getBoolean("verified"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try { if(rs != null) rs.close(); } catch(SQLException ignored){}
+            try { if(ps != null) ps.close(); } catch(SQLException ignored){}
+            closeConnection(con);
+        }
+        return user;
+    }
+
+    public boolean updateUser(User user) {
+        String sql;
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try {
+            con = getConnection();
+            
+            // Update with or without password
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                sql = "UPDATE users SET username=?, email=?, password=?, role=? WHERE id=?";
+                ps = con.prepareStatement(sql);
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getEmail());
+                ps.setString(3, user.getPassword());
+                ps.setString(4, user.getRole());
+                ps.setInt(5, user.getId());
+            } else {
+                sql = "UPDATE users SET username=?, email=?, role=? WHERE id=?";
+                ps = con.prepareStatement(sql);
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getEmail());
+                ps.setString(3, user.getRole());
+                ps.setInt(4, user.getId());
+            }
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { if(ps != null) ps.close(); } catch(SQLException ignored){}
+            closeConnection(con);
+        }
+    }
 }

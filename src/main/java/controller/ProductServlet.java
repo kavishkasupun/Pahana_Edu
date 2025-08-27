@@ -56,7 +56,7 @@ public class ProductServlet extends HttpServlet {
                 case "lowstock":
                     listLowStockProducts(request, response);
                     break;
-                case "search":  // New search action for cashier
+                case "search":
                     searchProducts(request, response);
                     break;
                 case "list":
@@ -119,13 +119,21 @@ public class ProductServlet extends HttpServlet {
                 product.setImage(imageBytes);
             }
             
-            productDAO.addProduct(product);
-            response.sendRedirect("ProductServlet?action=list");
+            boolean success = productDAO.addProduct(product);
+            
+            if (success) {
+                // Add success message to session
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "Product added successfully!");
+                response.sendRedirect("ProductServlet?action=list");
+            } else {
+                throw new Exception("Failed to add product to database");
+            }
         } catch (Exception e) {
-            request.setAttribute("error", "Error adding product: " + e.getMessage());
-            request.setAttribute("categories", categoryDAO.getAllCategories());
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/productForm.jsp");
-            dispatcher.forward(request, response);
+            // Add error message to session
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Error adding product: " + e.getMessage());
+            response.sendRedirect("ProductServlet?action=new");
         }
     }
 
@@ -146,19 +154,42 @@ public class ProductServlet extends HttpServlet {
                 product.setImage(imageBytes);
             }
             
-            productDAO.updateProduct(product);
-            response.sendRedirect("ProductServlet?action=list");
+            boolean success = productDAO.updateProduct(product);
+            
+            if (success) {
+                // Add success message to session
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "Product updated successfully!");
+                response.sendRedirect("ProductServlet?action=list");
+            } else {
+                throw new Exception("Failed to update product in database");
+            }
         } catch (Exception e) {
-            request.setAttribute("error", "Error updating product: " + e.getMessage());
-            request.setAttribute("categories", categoryDAO.getAllCategories());
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/productForm.jsp");
-            dispatcher.forward(request, response);
+            // Add error message to session
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Error updating product: " + e.getMessage());
+            response.sendRedirect("ProductServlet?action=edit&id=" + request.getParameter("id"));
         }
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        productDAO.deleteProduct(id);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean success = productDAO.deleteProduct(id);
+            
+            if (success) {
+                // Add success message to session
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "Product deleted successfully!");
+            } else {
+                throw new Exception("Failed to delete product from database");
+            }
+        } catch (Exception e) {
+            // Add error message to session
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Error deleting product: " + e.getMessage());
+        }
+        
         response.sendRedirect("ProductServlet?action=list");
     }
 

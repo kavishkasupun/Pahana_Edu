@@ -1,8 +1,10 @@
 package controller;
 
 import dao.ProductDAO;
-import model.Invoice;
 import dao.InvoiceDAO;
+import dao.CustomerDAO;
+import dao.InvoiceItemDAO;
+import model.Invoice;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -15,11 +17,15 @@ import java.util.List;
 public class AdminServlet extends HttpServlet {
     private ProductDAO productDAO;
     private InvoiceDAO invoiceDAO;
+    private CustomerDAO customerDAO;
+    private InvoiceItemDAO invoiceItemDAO;
 
     @Override
     public void init() {
         productDAO = new ProductDAO();
         invoiceDAO = new InvoiceDAO();
+        customerDAO = new CustomerDAO();
+        invoiceItemDAO = new InvoiceItemDAO();
     }
 
     @Override
@@ -57,6 +63,10 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("totalSalesAmount", totalSalesAmount);
             request.setAttribute("recentSales", recentSales);
             request.setAttribute("recentInvoices", recentInvoices);
+            
+            // Set DAO objects as attributes for JSP access
+            request.setAttribute("customerDAO", customerDAO);
+            request.setAttribute("invoiceItemDAO", invoiceItemDAO);
             
             // Forward to adminDashboard.jsp
             RequestDispatcher dispatcher = request.getRequestDispatcher("/Admin/adminDashboard.jsp");

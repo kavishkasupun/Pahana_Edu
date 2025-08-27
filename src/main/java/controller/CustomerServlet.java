@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import model.Customer;
 import dao.CustomerDAO;
 import util.EmailUtility;
@@ -80,6 +81,8 @@ public class CustomerServlet extends HttpServlet {
     }
 
     private void insertCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        
         Customer customer = new Customer();
         customer.setAccountNumber(request.getParameter("accountNumber"));
         customer.setName(request.getParameter("name"));
@@ -98,13 +101,18 @@ public class CustomerServlet extends HttpServlet {
             
             EmailUtility.sendEmail(customer.getEmail(), "Welcome to Pahana Edu", emailContent);
             
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer added successfully!");
             response.sendRedirect("CustomerServlet?action=list");
         } else {
-            throw new Exception("Could not insert customer");
+            session.setAttribute("errorMessage", "Could not insert customer. Please try again.");
+            response.sendRedirect("CustomerServlet?action=new");
         }
     }
 
     private void updateCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        
         Customer customer = new Customer();
         customer.setId(Integer.parseInt(request.getParameter("id")));
         customer.setAccountNumber(request.getParameter("accountNumber"));
@@ -114,20 +122,27 @@ public class CustomerServlet extends HttpServlet {
         customer.setEmail(request.getParameter("email"));
         
         if (customerDAO.updateCustomer(customer)) {
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer updated successfully!");
             response.sendRedirect("CustomerServlet?action=list");
         } else {
-            throw new Exception("Could not update customer");
+            session.setAttribute("errorMessage", "Could not update customer. Please try again.");
+            response.sendRedirect("CustomerServlet?action=edit&id=" + customer.getId());
         }
     }
 
     private void deleteCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
         int id = Integer.parseInt(request.getParameter("id"));
         
         if (customerDAO.deleteCustomer(id)) {
-            response.sendRedirect("CustomerServlet?action=list");
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer deleted successfully!");
         } else {
-            throw new Exception("Could not delete customer");
+            session.setAttribute("errorMessage", "Could not delete customer. Please try again.");
         }
+        
+        response.sendRedirect("CustomerServlet?action=list");
     }
 
     private void searchCustomers(HttpServletRequest request, HttpServletResponse response) throws IOException {

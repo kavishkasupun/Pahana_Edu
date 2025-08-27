@@ -17,6 +17,9 @@
   <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -77,7 +80,7 @@
               <h4 class="card-title"><%= request.getParameter("id") != null ? "Edit" : "Add" %> Customer</h4>
             </div>
             <div class="card-body">
-              <form action="${pageContext.request.contextPath}/CustomerServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
+              <form id="customerForm" action="${pageContext.request.contextPath}/CustomerServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
                 <% if (request.getParameter("id") != null || (request.getAttribute("customer") != null && ((Customer)request.getAttribute("customer")).getId() > 0)) { %>
                 <input type="hidden" name="id" value="<%= request.getParameter("id") != null ? request.getParameter("id") : ((Customer)request.getAttribute("customer")).getId() %>">
                 <% } %>
@@ -144,5 +147,84 @@
 <script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function() {
+    // Check for error message from session and show SweetAlert
+    <% if (request.getSession().getAttribute("errorMessage") != null) { %>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '<%= request.getSession().getAttribute("errorMessage") %>'
+        });
+        <% request.getSession().removeAttribute("errorMessage"); %>
+    <% } %>
+
+    // Handle form submission
+    $('#customerForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Basic validation
+        const accountNumber = $('#accountNumber').val().trim();
+        const name = $('#name').val().trim();
+        const address = $('#address').val().trim();
+        const telephone = $('#telephone').val().trim();
+        const email = $('#email').val().trim();
+        
+        if (!accountNumber || !name || !address || !telephone || !email) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please fill all required fields',
+                timer: 3000,
+                showConfirmButton: false
+            });
+            return;
+        }
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Please enter a valid email address',
+                timer: 3000,
+                showConfirmButton: false
+            });
+            return;
+        }
+        
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: '<%= request.getParameter("id") != null ? "Update" : "Add" %> this customer?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, <%= request.getParameter("id") != null ? "update" : "add" %> it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading message
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we save the customer',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+                
+                // Submit the form
+                this.submit();
+            }
+        });
+    });
+});
+</script>
 </body>
 </html>

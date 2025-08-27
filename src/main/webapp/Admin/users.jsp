@@ -22,6 +22,9 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"/>
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css"/>
   
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
   <style>
     .dataTables_wrapper .dataTables_filter input {
       border: 1px solid #dee2e6;
@@ -45,6 +48,12 @@
       padding: 0.25rem 0.5rem;
       font-size: 0.875rem;
       line-height: 1.5;
+    }
+    .action-buttons .btn {
+      margin-right: 5px;
+    }
+    .action-buttons .btn:last-child {
+      margin-right: 0;
     }
   </style>
 </head>
@@ -136,10 +145,15 @@
                       <td><%= user.getEmail() %></td>
                       <td><%= user.getRole() %></td>
                       <td><%= user.getCreatedAt() != null ? user.getCreatedAt().toString() : "" %></td>
-                      <td>
-                        <a href="${pageContext.request.contextPath}/UserManagementServlet?action=delete&id=<%= user.getId() %>" 
-                           class="btn btn-sm btn-danger" 
-                           onclick="return confirm('Are you sure you want to delete this user?')">
+                      <td class="action-buttons">
+                        <a href="${pageContext.request.contextPath}/UserManagementServlet?action=edit&id=<%= user.getId() %>" 
+                           class="btn btn-sm btn-primary">
+                          <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="#" 
+                           class="btn btn-sm btn-danger delete-btn" 
+                           data-id="<%= user.getId() %>"
+                           data-name="<%= user.getUsername() %>">
                           <i class="fa fa-trash"></i>
                         </a>
                       </td>
@@ -184,8 +198,27 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
 <script>
 $(document).ready(function() {
+    // Show success message if exists
+    <% 
+    String successMessage = (String) session.getAttribute("successMessage");
+    if (successMessage != null) { 
+        session.removeAttribute("successMessage");
+    %>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '<%= successMessage %>',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    <% } %>
+    
+    // Initialize DataTable
     $('#usersTable').DataTable({
         responsive: true,
         dom: '<"top"lf>rt<"bottom"ip><"clear">',
@@ -225,6 +258,27 @@ $(document).ready(function() {
                 }
             }
         ]
+    });
+    
+    // Delete confirmation with SweetAlert
+    $('.delete-btn').on('click', function(e) {
+        e.preventDefault();
+        var userId = $(this).data('id');
+        var userName = $(this).data('name');
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You are about to delete user: " + userName,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '${pageContext.request.contextPath}/UserManagementServlet?action=delete&id=' + userId;
+            }
+        });
     });
 });
 </script>
