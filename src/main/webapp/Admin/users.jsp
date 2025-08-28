@@ -60,36 +60,54 @@
 
 <body class="bg-theme bg-theme1">
 <div id="wrapper">
-  <!-- Same sidebar as adminDashboard -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
-      <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+      <a href="${pageContext.request.contextPath}/AdminServlet">
         <img src="${pageContext.request.contextPath}/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/AdminServlet" class="<%= request.getRequestURI().endsWith("/AdminServlet") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
         <a href="${pageContext.request.contextPath}/CategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
+      
       <li>
-        <a href="${pageContext.request.contextPath}/ProductServlet?action=list">
-          <i class="zmdi zmdi-grid"></i> <span>Products</span>
-        </a>
-      </li>
-      <li class="active">
-        <a href="accounts.jsp">
-          <i class="zmdi zmdi-face"></i> <span>Accounts</span>
-        </a>
-      </li>
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/Admin/accounts.jsp">
+	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	<li class="sidebar-header">REPORTS</li>
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+	     class="<%= request.getRequestURI().endsWith("salesReport.jsp") ? "active" : "" %>">
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
+	  </a>
+	</li>
+
       <li class="sidebar-header">SETTINGS</li>
       <li>
         <a href="${pageContext.request.contextPath}/Auth/index.jsp">
@@ -98,6 +116,7 @@
       </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">

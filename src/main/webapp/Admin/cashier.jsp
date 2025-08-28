@@ -329,9 +329,7 @@
                       <button class="btn btn-success btn-block" id="completeSaleBtn" disabled>
                         <i class="fa fa-check-circle"></i> Complete Sale
                       </button>
-                      <button class="btn btn-primary btn-block mt-2" id="printReceiptBtn" disabled>
-                        <i class="fa fa-print"></i> Print Receipt
-                      </button>
+                      
                     </div>
                   </div>
                 </div>
