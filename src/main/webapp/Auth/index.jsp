@@ -119,7 +119,7 @@
     </div>
     
     <div class="card-footer text-center py-3">
-      <p class="text-warning mb-0">Do not have an account? <a href="${pageContext.request.contextPath}/Auth/register.jsp">Sign Up here</a></p>
+      <p class="text-warning mb-0">If you already have an account, please log in. Otherwise, contact Administrator Support. </p>
     </div>
   </div>
   

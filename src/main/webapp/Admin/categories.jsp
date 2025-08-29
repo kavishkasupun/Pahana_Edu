@@ -164,10 +164,10 @@
                           <i class="fa fa-edit"></i>
                         </a>
                         <a href="${pageContext.request.contextPath}/CategoryServlet?action=delete&id=<%= category.getCategoryId() %>" 
-                           class="btn btn-sm btn-danger" 
-                           onclick="return confirmDelete(event, this.href)">
-                          <i class="fa fa-trash"></i>
-                        </a>
+						   class="btn btn-sm btn-danger" 
+						   onclick="return confirmDelete(event, this.href, '<%= category.getCategoryName().replace("'", "\\'") %>')">
+						   <i class="fa fa-trash"></i>
+						</a>
                       </td>
                     </tr>
                     <% } 
@@ -314,19 +314,33 @@ $(document).ready(function() {
 });
 
 // Custom delete confirmation with SweetAlert
-function confirmDelete(event, url) {
+function confirmDelete(event, url, categoryName) {
     event.preventDefault();
     
     Swal.fire({
         title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        html: `You are about to delete category: <b>${categoryName}</b><br><br>
+               This will also delete all books associated with this category!`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait while we delete the category',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Perform the delete
             window.location.href = url;
         }
     });

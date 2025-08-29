@@ -125,6 +125,21 @@
       background-color: #138496;
       border-color: #117a8b;
     }
+    .balance-thankyou {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding: 12px;
+      border-top: 1px solid #eee;
+    }
+    .thank-you {
+      font-weight: bold;
+      color: #4680ff;
+    }
+    .balance-amount {
+      font-weight: bold;
+    }
     @media print {
       body { 
         padding: 0; 
@@ -198,19 +213,19 @@
           <td><strong>Amount Paid:</strong></td>
           <td class="text-right"><strong>Rs. ${String.format("%.2f", invoice.amountPaid)}</strong></td>
         </tr>
-        <tr>
-          <td><strong>Balance:</strong></td>
-          <td class="text-right"><strong>Rs. ${String.format("%.2f", invoice.balance)}</strong></td>
-        </tr>
       </table>
+      
+      <div class="balance-thankyou">
+        <div class="thank-you">Thank you for your purchase!</div>
+        <div class="balance-amount">Balance: Rs. ${String.format("%.2f", invoice.balance)}</div>
+      </div>
     </div>
     
-    <div class="footer">
-      <p>Thank you for your purchase!</p>
-      <p>Pahana Edu - ${java.time.Year.now().getValue()}</p>
+    <div class="thank-you">
+      <p>  Pahana Edu - ${invoice.invoiceDate}</p>
     </div>
     
-    <div class="no-print">
+    <div class="no-print mb-5">
       <button onclick="window.print()" class="btn btn-primary">
         <i class="fa fa-print"></i> Print Invoice
       </button>
