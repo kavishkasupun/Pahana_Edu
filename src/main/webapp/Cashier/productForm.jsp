@@ -19,6 +19,9 @@
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
   <style>
     .image-preview {
       max-width: 200px;
@@ -43,7 +46,7 @@
 <body class="bg-theme bg-theme1">
  
 <div id="wrapper">
-  <!-- Same sidebar as adminDashboard -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
       <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
@@ -51,26 +54,48 @@
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp" class="<%= request.getRequestURI().endsWith("/cashierDashboard.jsp") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
         <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
+      
       <li>
-        <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="active">
-          <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("/CashierCustomerServlet") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list">
+	        <i class="zmdi zmdi-face"></i> <span>Manage Customers</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	
+      <li class="sidebar-header">SETTINGS</li>
+      <li>
+        <a href="${pageContext.request.contextPath}/Auth/index.jsp">
+          <i class="zmdi zmdi-power"></i> <span>Logout</span>
         </a>
       </li>
-      <!-- Other menu items -->
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
@@ -89,11 +114,7 @@
               <h4 class="card-title">${not empty product ? 'Edit' : 'Add'} Product</h4>
             </div>
             <div class="card-body">
-              <c:if test="${not empty error}">
-                <div class="alert alert-danger">${error}</div>
-              </c:if>
-              
-              <form action="${pageContext.request.contextPath}/CashierProductServlet?action=${not empty product ? 'update' : 'insert'}" method="post" enctype="multipart/form-data">
+              <form action="${pageContext.request.contextPath}/CashierProductServlet?action=${not empty product ? 'update' : 'insert'}" method="post" enctype="multipart/form-data" id="productForm">
                 <c:if test="${not empty product}">
                   <input type="hidden" name="id" value="${product.productId}">
                 </c:if>
@@ -181,6 +202,9 @@
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 // Image preview functionality
 document.getElementById('image').addEventListener('change', function(event) {
@@ -196,20 +220,42 @@ document.getElementById('image').addEventListener('change', function(event) {
     }
 });
 
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
+// Form validation and success message
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Basic validation
+    const productName = document.getElementById('productName').value.trim();
+    const categoryId = document.getElementById('categoryId').value;
     const price = parseFloat(document.getElementById('price').value);
     const quantity = parseInt(document.getElementById('quantity').value);
     
+    if (!productName || !categoryId || isNaN(price) || isNaN(quantity)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please fill all required fields',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        return;
+    }
+    
     if (price < 0) {
-        alert('Price cannot be negative');
-        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Price',
+            text: 'Price cannot be negative'
+        });
         return;
     }
     
     if (quantity < 0) {
-        alert('Quantity cannot be negative');
-        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Quantity',
+            text: 'Quantity cannot be negative'
+        });
         return;
     }
     
@@ -218,12 +264,51 @@ document.querySelector('form').addEventListener('submit', function(e) {
         const file = fileInput.files[0];
         const fileSize = file.size / 1024 / 1024; // in MB
         if (fileSize > 10) {
-            alert('File size exceeds 10MB limit');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'File size exceeds 10MB limit'
+            });
             return;
         }
     }
+    
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: '${not empty product ? "Update" : "Add"} this product?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, ${not empty product ? "update" : "add"} it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading message
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we save your product',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+            
+            // Submit the form
+            this.submit();
+        }
+    });
 });
+
+// Check for error message from session and show SweetAlert
+<c:if test="${not empty sessionScope.errorMessage}">
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: '${sessionScope.errorMessage}'
+    });
+    <c:remove var="errorMessage" scope="session"/>
+</c:if>
 </script>
 </body>
 </html>

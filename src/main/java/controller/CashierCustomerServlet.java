@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import model.Customer;
 import dao.CustomerDAO;
 import util.EmailUtility;
@@ -46,7 +47,7 @@ public class CashierCustomerServlet extends HttpServlet {
                 case "update":
                     updateCustomer(request, response);
                     break;
-                case "search":
+                case "search":  // New search action for cashier
                     searchCustomers(request, response);
                     break;
                 default:
@@ -80,6 +81,8 @@ public class CashierCustomerServlet extends HttpServlet {
     }
 
     private void insertCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        
         Customer customer = new Customer();
         customer.setAccountNumber(request.getParameter("accountNumber"));
         customer.setName(request.getParameter("name"));
@@ -98,13 +101,18 @@ public class CashierCustomerServlet extends HttpServlet {
             
             EmailUtility.sendEmail(customer.getEmail(), "Welcome to Pahana Edu", emailContent);
             
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer added successfully!");
             response.sendRedirect("CashierCustomerServlet?action=list");
         } else {
-            throw new Exception("Could not insert customer");
+            session.setAttribute("errorMessage", "Could not insert customer. Please try again.");
+            response.sendRedirect("CashierCustomerServlet?action=new");
         }
     }
 
     private void updateCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
+        
         Customer customer = new Customer();
         customer.setId(Integer.parseInt(request.getParameter("id")));
         customer.setAccountNumber(request.getParameter("accountNumber"));
@@ -114,26 +122,34 @@ public class CashierCustomerServlet extends HttpServlet {
         customer.setEmail(request.getParameter("email"));
         
         if (customerDAO.updateCustomer(customer)) {
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer updated successfully!");
             response.sendRedirect("CashierCustomerServlet?action=list");
         } else {
-            throw new Exception("Could not update customer");
+            session.setAttribute("errorMessage", "Could not update customer. Please try again.");
+            response.sendRedirect("CashierCustomerServlet?action=edit&id=" + customer.getId());
         }
     }
 
     private void deleteCustomer(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
         int id = Integer.parseInt(request.getParameter("id"));
         
         if (customerDAO.deleteCustomer(id)) {
-            response.sendRedirect("CashierCustomerServlet?action=list");
+            // Add success message to session
+            session.setAttribute("successMessage", "Customer deleted successfully!");
         } else {
-            throw new Exception("Could not delete customer");
+            session.setAttribute("errorMessage", "Could not delete customer. Please try again.");
         }
+        
+        response.sendRedirect("CashierCustomerServlet?action=list");
     }
 
     private void searchCustomers(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String keyword = request.getParameter("keyword");
         List<Customer> customers = customerDAO.searchCustomers(keyword);
         
+        // Convert to JSON and send response
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(new Gson().toJson(customers));

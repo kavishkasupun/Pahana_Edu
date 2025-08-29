@@ -35,6 +35,7 @@
       border: 1px solid #eee; 
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); 
       background-color: white;
+      position: relative;
     }
     .header { 
       display: flex; 
@@ -85,6 +86,8 @@
     .no-print { 
       margin-top: 20px;
       text-align: center;
+      position: relative;
+      z-index: 100;
     }
     .btn {
       padding: 8px 20px;
@@ -92,6 +95,8 @@
       font-weight: 500;
       text-decoration: none;
       margin: 0 5px;
+      display: inline-block;
+      cursor: pointer;
     }
     .btn-primary {
       background-color: #4680ff;
@@ -212,9 +217,7 @@
       <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new" class="btn btn-secondary">
         <i class="fa fa-plus"></i> New Sale
       </a>
-      <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=report" class="btn btn-info">
-        <i class="fa fa-chart-bar"></i> Sales Report
-      </a>
+     
     </div>
   </div>
 

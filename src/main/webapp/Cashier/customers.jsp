@@ -1,13 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, model.Customer, model.User" %>
+<%@ page import="java.util.List, model.Customer" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-  <title>Pahana Edu - Cashier Customers</title>
+  <title>Pahana Edu - Customers</title>
   
+  <!-- Same styles as adminDashboard -->
   <link href="${pageContext.request.contextPath}/assets/css/pace.min.css" rel="stylesheet"/>
   <script src="${pageContext.request.contextPath}/assets/js/pace.min.js"></script>
   <link href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css" rel="stylesheet"/>
@@ -21,11 +22,19 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"/>
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css"/>
   
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  
   <style>
     .dataTables_wrapper .dataTables_filter input {
       border: 1px solid #dee2e6;
       padding: 0.375rem 0.75rem;
       border-radius: 0.25rem;
+    }
+    .table thead th.sorting:after,
+    .table thead th.sorting_asc:after,
+    .table thead th.sorting_desc:after {
+      color: #fff;
     }
     .table thead th {
       color: #fff;
@@ -38,13 +47,14 @@
     .btn-sm {
       padding: 0.25rem 0.5rem;
       font-size: 0.875rem;
+      line-height: 1.5;
     }
   </style>
 </head>
 
 <body class="bg-theme bg-theme1">
 <div id="wrapper">
-  <!-- Sidebar -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
       <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
@@ -56,15 +66,43 @@
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp" class="<%= request.getRequestURI().endsWith("/cashierDashboard.jsp") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
-      <li class="active">
-        <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list">
-          <i class="zmdi zmdi-accounts"></i> <span>Customers</span>
+
+      <li>
+        <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list">
+          <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
+      
+      <li>
+		 <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("/CashierCustomerServlet") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list">
+	        <i class="zmdi zmdi-face"></i> <span>Manage Customers</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	
+	<!-- Help Section Menu Item -->
+	<li class="sidebar-header">SUPPORT</li>
+	<li>
+	  <a href="#" id="helpMenuLink">
+	    <i class="zmdi zmdi-help" style="color: #00c9ff;"></i> <span style="color: #00c9ff;">Help & Support</span>
+	  </a>
+	</li>
+
       <li class="sidebar-header">SETTINGS</li>
       <li>
         <a href="${pageContext.request.contextPath}/Auth/index.jsp">
@@ -73,71 +111,16 @@
       </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
-  <!-- Topbar -->
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
-      <ul class="navbar-nav mr-auto align-items-center">
-        <li class="nav-item">
-          <a class="nav-link toggle-menu" href="javascript:void();">
-            <i class="icon-menu menu-icon"></i>
-          </a>
-        </li>
-      </ul>
-      
-      <ul class="navbar-nav align-items-center right-nav-link">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
-            <span class="user-profile">
-              <img src="https://via.placeholder.com/110x110" class="img-circle" alt="user avatar">
-            </span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-right">
-            <li class="dropdown-item user-details">
-              <a href="javaScript:void();">
-                <div class="media">
-                  <div class="avatar">
-                    <img class="align-self-start mr-3" src="https://via.placeholder.com/110x110" alt="user avatar">
-                  </div>
-                  <div class="media-body">
-                    <h6 class="mt-2 user-title">
-                      <%
-                        User user = (User) session.getAttribute("user");
-                        if (user != null) {
-                          out.print(user.getUsername());
-                        } else {
-                          out.print("Cashier");
-                        }
-                      %>
-                    </h6>
-                    <p class="user-subtitle">
-                      <%
-                        if (user != null) {
-                          out.print(user.getEmail());
-                        } else {
-                          out.print("cashier@pahana.edu");
-                        }
-                      %>
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><i class="icon-settings mr-2"></i> Setting</li>
-            <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><i class="icon-power mr-2"></i> 
-              <a href="${pageContext.request.contextPath}/Auth/index.jsp">Logout</a>
-            </li>
-          </ul>
-        </li>
-      </ul>
+      <!-- Same topbar as adminDashboard -->
     </nav>
   </header>
 
   <div class="clearfix"></div>
   
-  <!-- Main Content -->
   <div class="content-wrapper">
     <div class="container-fluid">
       <div class="row">
@@ -147,7 +130,7 @@
               <h4 class="card-title">Customer Management</h4>
               <div class="card-action">
                 <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=new" class="btn btn-primary">
-                  <i class="fa fa-plus"></i> Add New Customer
+                  <i class="fa fa-plus"></i> Add New
                 </a>
               </div>
             </div>
@@ -181,12 +164,12 @@
                       <td>
                         <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=edit&id=<%= customer.getId() %>" 
                            class="btn btn-sm btn-warning">
-                          <i class="fa fa-edit"></i> Edit
+                          <i class="fa fa-edit"></i>
                         </a>
                         <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=delete&id=<%= customer.getId() %>" 
                            class="btn btn-sm btn-danger" 
-                           onclick="return confirm('Are you sure you want to delete this customer?')">
-                          <i class="fa fa-trash"></i> Delete
+                           onclick="return confirmDelete(event, this.href)">
+                          <i class="fa fa-trash"></i>
                         </a>
                       </td>
                     </tr>
@@ -206,7 +189,7 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- Same footer as adminDashboard -->
   <footer class="footer">
     <div class="container">
       <div class="text-center">
@@ -216,7 +199,7 @@
   </footer>
 </div>
 
-<!-- Scripts -->
+<!-- Same scripts as adminDashboard -->
 <script src="${pageContext.request.contextPath}/assets/js/jquery.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/popper.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.min.js"></script>
@@ -230,8 +213,57 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
 
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(document).ready(function() {
+    // Check for success message and show SweetAlert
+    <% if (request.getSession().getAttribute("successMessage") != null) { %>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '<%= request.getSession().getAttribute("successMessage") %>',
+            timer: 3000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true,
+            background: '#28a745',
+            iconColor: '#fff',
+            timerProgressBar: true,
+            showClass: {
+                popup: 'animate__animated animate__fadeInRight'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutRight'
+            }
+        });
+        <% request.getSession().removeAttribute("successMessage"); %>
+    <% } %>
+    
+    // Check for error message and show SweetAlert
+    <% if (request.getSession().getAttribute("errorMessage") != null) { %>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '<%= request.getSession().getAttribute("errorMessage") %>',
+            timer: 3000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true,
+            background: '#dc3545',
+            iconColor: '#fff',
+            timerProgressBar: true,
+            showClass: {
+                popup: 'animate__animated animate__fadeInRight'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutRight'
+            }
+        });
+        <% request.getSession().removeAttribute("errorMessage"); %>
+    <% } %>
+
     $('#customersTable').DataTable({
         responsive: true,
         dom: '<"top"lf>rt<"bottom"ip><"clear">',
@@ -249,14 +281,23 @@ $(document).ready(function() {
                 previous: "Previous"
             }
         },
+        columns: [
+            { data: 'id' },        // Column 0: ID
+            { data: 'accountNo' }, // Column 1: Account No
+            { data: 'name' },      // Column 2: Name
+            { data: 'email' },     // Column 3: Email
+            { data: 'telephone' }, // Column 4: Telephone
+            { data: 'createdAt' }, // Column 5: Created At
+            { data: 'actions' }    // Column 6: Actions
+        ],
         columnDefs: [
             { 
-                targets: [6], // Actions column
+                targets: [6], // Actions column (index 6)
                 orderable: false,
                 searchable: false
             },
             {
-                targets: [5], // Created At column
+                targets: [5], // Created At column (index 5)
                 render: function(data, type, row) {
                     if (type === 'display' || type === 'filter') {
                         if (data) {
@@ -266,10 +307,46 @@ $(document).ready(function() {
                     }
                     return data;
                 }
-            }
+            },
+            { responsivePriority: 1, targets: 2 }, // Name (highest priority)
+            { responsivePriority: 2, targets: 1 }, // Account No
+            { responsivePriority: 3, targets: 3 }  // Email
         ]
     });
 });
+
+// Custom delete confirmation with SweetAlert
+function confirmDelete(event, url) {
+    event.preventDefault();
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading message
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait while we delete the customer',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+            
+            window.location.href = url;
+        }
+    });
+    
+    return false;
+}
 </script>
 </body>
 </html>

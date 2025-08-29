@@ -158,7 +158,7 @@
 </head>
 <body class="bg-theme bg-theme1">
 <div id="wrapper">
-  <!-- Sidebar -->
+   <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
       <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
@@ -166,42 +166,50 @@
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp" class="<%= request.getRequestURI().endsWith("/cashierDashboard.jsp") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
         <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
+      
       <li>
-        <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list">
-          <i class="zmdi zmdi-grid"></i> <span>Products</span>
-        </a>
-      </li>
-      <li class="active">
-        <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
-          <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
-        </a>
-      </li>
-      <li>
-        <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list">
-          <i class="zmdi zmdi-face"></i> <span>Customers</span>
-        </a>
-      </li>
-      <li class="sidebar-header">REPORTS</li>
-      <li>
-	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=report" 
-	     >
-	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
+		 <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("/CustomerServlet") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/CustomerServlet?action=list">
+	        <i class="zmdi zmdi-face"></i> <span>Manage Customers</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
 	  </a>
 	</li>
+	
+	
+
+      <li class="sidebar-header">SETTINGS</li>
+      <li>
+        <a href="${pageContext.request.contextPath}/Auth/index.jsp">
+          <i class="zmdi zmdi-power"></i> <span>Logout</span>
+        </a>
+      </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
@@ -315,9 +323,7 @@
                       <button class="btn btn-success btn-block" id="completeSaleBtn" disabled>
                         <i class="fa fa-check-circle"></i> Complete Sale
                       </button>
-                      <button class="btn btn-primary btn-block mt-2" id="printReceiptBtn" disabled>
-                        <i class="fa fa-print"></i> Print Receipt
-                      </button>
+                      
                     </div>
                   </div>
                 </div>
@@ -710,86 +716,86 @@ $(document).ready(function() {
 
     // Check session before completing sale
     function completeSale() {
-        // First check session
-        $.ajax({
-            url: '${pageContext.request.contextPath}/CheckSessionServlet',
-            type: 'GET',
-            success: function(response) {
-                if (response === 'expired') {
-                    $('#sessionExpiredModal').modal('show');
-                } else {
-                    // Original complete sale code
-                    Swal.fire({
-                        title: 'Confirm Sale',
-                        text: 'Are you sure you want to complete this sale?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, complete sale'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.ajax({
-                                url: '${pageContext.request.contextPath}/CashierInvoiceServlet',
-                                type: 'POST',
-                                data: {
-                                    action: 'create',
-                                    customerId: selectedCustomer.id,
-                                    amountPaid: $('#amountPaid').val(),
-                                    items: JSON.stringify(cart)
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        const invoiceId = response.invoiceId;
-                                        const emailSent = response.emailSent;
-                                        
-                                        let successMessage = 'Invoice #' + invoiceId + ' has been created successfully.';
-                                        if (emailSent) {
-                                            successMessage += "<br>Email receipt has been sent to the customer.";
+    // First check session
+    $.ajax({
+        url: '${pageContext.request.contextPath}/CheckSessionServlet',
+        type: 'GET',
+        success: function(response) {
+            if (response === 'expired') {
+                $('#sessionExpiredModal').modal('show');
+            } else {
+                // Original complete sale code
+                Swal.fire({
+                    title: 'Confirm Sale',
+                    text: 'Are you sure you want to complete this sale?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, complete sale'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '${pageContext.request.contextPath}/CashierInvoiceServlet',
+                            type: 'POST',
+                            data: {
+                                action: 'create',
+                                customerId: selectedCustomer.id,
+                                amountPaid: $('#amountPaid').val(),
+                                items: JSON.stringify(cart)
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    const invoiceId = response.invoiceId;
+                                    const emailSent = response.emailSent;
+                                    
+                                    let successMessage = 'Invoice #' + invoiceId + ' has been created successfully.';
+                                    if (emailSent) {
+                                        successMessage += "<br>Email receipt has been sent to the customer.";
+                                    } else {
+                                        successMessage += "<br>Failed to send email receipt.";
+                                    }
+                                    
+                                    Swal.fire({
+                                        title: 'Sale Completed!',
+                                        html: successMessage,
+                                        icon: 'success',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'View Invoice',
+                                        cancelButtonText: 'New Sale',
+                                        allowOutsideClick: false
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            // Fixed URL construction
+                                            window.location.href = '${pageContext.request.contextPath}/CashierInvoiceServlet?action=view&id=' + invoiceId;
                                         } else {
-                                            successMessage += "<br>Failed to send email receipt.";
+                                            resetSaleForm();
                                         }
-                                        
-                                        Swal.fire({
-                                            title: 'Sale Completed!',
-                                            html: successMessage,
-                                            icon: 'success',
-                                            showCancelButton: true,
-                                            confirmButtonText: 'View Invoice',
-                                            cancelButtonText: 'New Sale',
-                                            allowOutsideClick: false
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                // Fixed URL construction
-                                                window.location.href = '${pageContext.request.contextPath}/CashierInvoiceServlet?action=view&id=' + invoiceId;
-                                            } else {
-                                                resetSaleForm();
-                                            }
-                                        });
-                                        
-                                        printReceipt(invoiceId);
-                                    } else {
-                                        Swal.fire('Error', response.message || 'Failed to complete sale', 'error');
-                                    }
-                                },
-                                error: function(xhr, status, error) {
-                                    if (xhr.status === 401) {
-                                        $('#sessionExpiredModal').modal('show');
-                                    } else {
-                                        console.error(error);
-                                        Swal.fire('Error', 'Failed to complete sale: ' + error, 'error');
-                                    }
+                                    });
+                                    
+                                    printReceipt(invoiceId);
+                                } else {
+                                    Swal.fire('Error', response.message || 'Failed to complete sale', 'error');
                                 }
-                            });
-                        }
-                    });
-                }
-            },
-            error: function() {
-                console.log('Error checking session');
+                            },
+                            error: function(xhr, status, error) {
+                                if (xhr.status === 401) {
+                                    $('#sessionExpiredModal').modal('show');
+                                } else {
+                                    console.error(error);
+                                    Swal.fire('Error', 'Failed to complete sale: ' + error, 'error');
+                                }
+                            }
+                        });
+                    }
+                });
             }
-        });
-    }
+        },
+        error: function() {
+            console.log('Error checking session');
+        }
+    });
+}
     
     function resetSaleForm() {
         cart = [];

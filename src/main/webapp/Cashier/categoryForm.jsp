@@ -17,12 +17,15 @@
   <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 
 <body class="bg-theme bg-theme1">
  
 <div id="wrapper">
-  <!-- Same sidebar as adminDashboard -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
       <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
@@ -30,21 +33,50 @@
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/Cashier/cashierDashboard.jsp" class="<%= request.getRequestURI().endsWith("/cashierDashboard.jsp") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
         <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
-      <!-- Other menu items -->
+      
+      <li>
+		 <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("/CustomerServlet") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/CustomerServlet?action=list">
+	        <i class="zmdi zmdi-face"></i> <span>Manage Customers</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	
+	
+
+      <li class="sidebar-header">SETTINGS</li>
+      <li>
+        <a href="${pageContext.request.contextPath}/Auth/index.jsp">
+          <i class="zmdi zmdi-power"></i> <span>Logout</span>
+        </a>
+      </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
@@ -63,7 +95,7 @@
               <h4 class="card-title"><%= request.getParameter("id") != null ? "Edit" : "Add" %> Category</h4>
             </div>
             <div class="card-body">
-              <form action="${pageContext.request.contextPath}/CashierCategoryServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
+              <form id="categoryForm" action="${pageContext.request.contextPath}/CashierCategoryServlet?action=<%= request.getParameter("id") != null ? "update" : "insert" %>" method="post">
                 <% if (request.getParameter("id") != null) { %>
                 <input type="hidden" name="id" value="<%= request.getParameter("id") %>">
                 <% } %>
@@ -112,5 +144,46 @@
 <script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+<script>
+// Form validation and confirmation
+$(document).ready(function() {
+    $('#categoryForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Basic validation
+        var categoryName = $('#name').val().trim();
+        if (categoryName === '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Category name is required!'
+            });
+            return false;
+        }
+        
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: '<%= request.getParameter("id") != null ? "Update" : "Add" %> this category?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, <%= request.getParameter("id") != null ? "update" : "add" %> it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If confirmed, submit the form
+                this.submit();
+            }
+        });
+        
+        return false;
+    });
+});
+</script>
 </body>
 </html>

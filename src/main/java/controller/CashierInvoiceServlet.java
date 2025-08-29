@@ -126,7 +126,7 @@ public class CashierInvoiceServlet extends HttpServlet {
     private void listInvoices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Invoice> invoices = invoiceDAO.getAllInvoices();
         request.setAttribute("invoices", invoices);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/Cashier/viewInvoice.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/Cashier/printInvoice.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -137,7 +137,7 @@ public class CashierInvoiceServlet extends HttpServlet {
                 String idParam = request.getParameter("id");
                 if (idParam == null || idParam.isEmpty()) {
                     request.setAttribute("errorMessage", "Invoice ID is required");
-                    request.getRequestDispatcher("/Cashier/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Cashier/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
@@ -146,14 +146,14 @@ public class CashierInvoiceServlet extends HttpServlet {
                     invoiceId = Integer.parseInt(idParam);
                 } catch (NumberFormatException e) {
                     request.setAttribute("errorMessage", "Invalid Invoice ID format");
-                    request.getRequestDispatcher("/Cashier/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Cashier/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
                 Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
                 if (invoice == null) {
                     request.setAttribute("errorMessage", "Invoice not found with ID: " + invoiceId);
-                    request.getRequestDispatcher("/Cashier/viewInvoice.jsp").forward(request, response);
+                    request.getRequestDispatcher("/Cashier/printInvoice.jsp").forward(request, response);
                     return;
                 }
 
@@ -170,12 +170,12 @@ public class CashierInvoiceServlet extends HttpServlet {
                 request.setAttribute("items", items);
                 request.setAttribute("customer", customer);
                 
-                RequestDispatcher dispatcher = request.getRequestDispatcher("/Cashier/viewInvoice.jsp");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/Cashier/printInvoice.jsp");
                 dispatcher.forward(request, response);
                 
             } catch (Exception e) {
                 request.setAttribute("errorMessage", "Error viewing invoice: " + e.getMessage());
-                request.getRequestDispatcher("/Cashier/viewInvoice.jsp").forward(request, response);
+                request.getRequestDispatcher("/Cashier/printInvoice.jsp").forward(request, response);
             }
         }
 
@@ -253,7 +253,7 @@ public class CashierInvoiceServlet extends HttpServlet {
             String itemsJson = request.getParameter("items");
 
             // Parse cart items
-            List<CartItem1> cartItems = gson.fromJson(itemsJson, new TypeToken<List<CartItem1>>(){}.getType());
+            List<CartItem> cartItems = gson.fromJson(itemsJson, new TypeToken<List<CartItem>>(){}.getType());
             if (cartItems == null || cartItems.isEmpty()) {
                 throw new ServletException("No items in cart");
             }
@@ -285,31 +285,31 @@ public class CashierInvoiceServlet extends HttpServlet {
             }
 
             // Add invoice items and update product quantities
-            for (CartItem1 cartItem1 : cartItems) {
+            for (CartItem cartItem : cartItems) {
                 // Check product availability
-                Product product = productDAO.getProductById(cartItem1.getProductId(), connection);
+                Product product = productDAO.getProductById(cartItem.getProductId(), connection);
                 if (product == null) {
-                    throw new ServletException("Product not found: " + cartItem1.getProductId());
+                    throw new ServletException("Product not found: " + cartItem.getProductId());
                 }
                 
-                if (product.getQuantity() < cartItem1.getQuantity()) {
+                if (product.getQuantity() < cartItem.getQuantity()) {
                     throw new ServletException("Insufficient stock for product: " + product.getProductName());
                 }
 
                 // Create invoice item
                 InvoiceItem item = new InvoiceItem();
                 item.setInvoiceId(invoiceId);
-                item.setProductId(cartItem1.getProductId());
-                item.setQuantity(cartItem1.getQuantity());
-                item.setUnitPrice(cartItem1.getPrice());
-                item.setTotal(cartItem1.getPrice() * cartItem1.getQuantity());
+                item.setProductId(cartItem.getProductId());
+                item.setQuantity(cartItem.getQuantity());
+                item.setUnitPrice(cartItem.getPrice());
+                item.setTotal(cartItem.getPrice() * cartItem.getQuantity());
                 
                 if (!invoiceItemDAO.addInvoiceItem(item, connection)) {
                     throw new ServletException("Failed to add invoice item");
                 }
 
                 // Update product stock
-                product.setQuantity(product.getQuantity() - cartItem1.getQuantity());
+                product.setQuantity(product.getQuantity() - cartItem.getQuantity());
                 if (!productDAO.updateProduct(product, connection)) {
                     throw new ServletException("Failed to update product stock");
                 }
@@ -543,7 +543,7 @@ public class CashierInvoiceServlet extends HttpServlet {
         }
 }
 
-class CartItem1 {
+class CasCartItem {
     private int productId;
     private String productName;
     private double price;

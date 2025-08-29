@@ -16,10 +16,18 @@ public class CashierCategoryServlet extends HttpServlet {
     public void init() {
         categoryDAO = new CategoryDAO();
     }
+    
+    // Add this setter for testing
+    protected void setCategoryDAO(CategoryDAO categoryDAO) {
+        this.categoryDAO = categoryDAO;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        if (action == null) {
+            action = "list"; // default action
+        }
         
         try {
             switch (action) {
@@ -75,29 +83,50 @@ public class CashierCategoryServlet extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
-    private void insertCategory(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void insertCategory(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String name = request.getParameter("name");
         String description = request.getParameter("description");
         
         Category newCategory = new Category(name, description);
-        categoryDAO.addCategory(newCategory);
+        boolean success = categoryDAO.addCategory(newCategory);
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Category added successfully!");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to add category. Please try again.");
+        }
+        
         response.sendRedirect(request.getContextPath() + "/CashierCategoryServlet?action=list");
     }
 
-    private void updateCategory(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void updateCategory(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
         String name = request.getParameter("name");
         String description = request.getParameter("description");
         
         Category category = new Category(name, description);
         category.setCategoryId(id);
-        categoryDAO.updateCategory(category);
+        boolean success = categoryDAO.updateCategory(category);
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Category updated successfully!");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to update category. Please try again.");
+        }
+        
         response.sendRedirect(request.getContextPath() + "/CashierCategoryServlet?action=list");
     }
 
-    private void deleteCategory(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void deleteCategory(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
-        categoryDAO.deleteCategory(id);
+        boolean success = categoryDAO.deleteCategory(id);
+        
+        if (success) {
+            request.getSession().setAttribute("successMessage", "Category deleted successfully!");
+        } else {
+            request.getSession().setAttribute("errorMessage", "Failed to delete category. Please try again.");
+        }
+        
         response.sendRedirect(request.getContextPath() + "/CashierCategoryServlet?action=list");
     }
 
