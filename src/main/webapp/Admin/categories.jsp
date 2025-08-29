@@ -334,5 +334,61 @@ function confirmDelete(event, url) {
     return false;
 }
 </script>
+
+  <!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%); color: white; border-radius: 15px;">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+        <h5 class="modal-title" id="logoutModalLabel" style="color: #00c9ff;">
+          <i class="fa fa-question-circle mr-2"></i>Confirm Logout
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="fa fa-sign-out-alt fa-3x mb-3" style="color: #00c9ff;"></i>
+        <h4>Are you sure you want to logout?</h4>
+        <p>You will need to login again to access the system.</p>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.2);">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+          <i class="fa fa-times mr-2"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="confirmLogout" style="background: linear-gradient(45deg, #00c9ff, #92fe9d); border: none;">
+          <i class="fa fa-sign-out-alt mr-2"></i>Yes, Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Logout confirmation functionality
+$(document).ready(function() {
+    // Intercept logout link click
+    $('a[href="${pageContext.request.contextPath}/Auth/index.jsp"]').on('click', function(e) {
+        e.preventDefault(); // Prevent default link behavior
+        $('#logoutModal').modal('show'); // Show confirmation modal
+    });
+    
+    // Handle confirm logout button click
+    $('#confirmLogout').on('click', function() {
+        // Redirect to logout page after confirmation
+        window.location.href = '${pageContext.request.contextPath}/Auth/index.jsp';
+    });
+    
+    // Optional: Add keyboard support (ESC to close, Enter to confirm)
+    $('#logoutModal').on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            $(this).modal('hide');
+        } else if (e.key === 'Enter' && $(this).hasClass('show')) {
+            $('#confirmLogout').click();
+        }
+    });
+});
+</script>
+
 </body>
 </html>

@@ -24,36 +24,56 @@
 
 <body class="bg-theme bg-theme1">
 <div id="wrapper">
-  <!-- Same sidebar as adminDashboard -->
+  <!--Start sidebar-wrapper-->
   <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
     <div class="brand-logo">
-      <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+      <a href="${pageContext.request.contextPath}/AdminServlet">
         <img src="${pageContext.request.contextPath}/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
         <h5 class="logo-text">Pahana Edu</h5>
       </a>
     </div>
+    
     <ul class="sidebar-menu do-nicescrol">
       <li class="sidebar-header">MAIN NAVIGATION</li>
       <li>
-        <a href="${pageContext.request.contextPath}/Admin/adminDashboard.jsp">
+        <a href="${pageContext.request.contextPath}/AdminServlet" class="<%= request.getRequestURI().endsWith("/AdminServlet") ? "active" : "" %>">
           <i class="zmdi zmdi-view-dashboard"></i> <span>Dashboard</span>
         </a>
       </li>
+
       <li>
         <a href="${pageContext.request.contextPath}/CategoryServlet?action=list">
           <i class="zmdi zmdi-format-list-bulleted"></i> <span>Categories</span>
         </a>
       </li>
+      
       <li>
-        <a href="${pageContext.request.contextPath}/ProductServlet?action=list">
-          <i class="zmdi zmdi-grid"></i> <span>Products</span>
-        </a>
-      </li>
-      <li class="active">
-        <a href="accounts.jsp">
-          <i class="zmdi zmdi-face"></i> <span>Accounts</span>
-        </a>
-      </li>
+		 <a href="${pageContext.request.contextPath}/ProductServlet?action=list" class="<%= request.getRequestURI().endsWith("products.jsp") ? "active" : "" %>">
+		   <i class="zmdi zmdi-grid"></i> <span>Products</span>
+		 </a>
+	 </li>
+
+     <li class="<%= request.getRequestURI().endsWith("accounts.jsp") ? "active" : "" %>">
+	    <a href="${pageContext.request.contextPath}/Admin/accounts.jsp">
+	        <i class="zmdi zmdi-face"></i> <span>Accounts</span>
+	    </a>
+	</li>
+	
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=new">
+	    <i class="zmdi zmdi-shopping-cart"></i> <span>Cashier</span>
+	  </a>
+	</li>
+	<li class="sidebar-header">REPORTS</li>
+	<li>
+	  <a href="${pageContext.request.contextPath}/InvoiceServlet?action=report" 
+	     class="<%= request.getRequestURI().endsWith("salesReport.jsp") ? "active" : "" %>">
+	    <i class="zmdi zmdi-receipt"></i> <span>Sales Report</span>
+	  </a>
+	</li>
+	
+	
+
       <li class="sidebar-header">SETTINGS</li>
       <li>
         <a href="${pageContext.request.contextPath}/Auth/index.jsp">
@@ -62,6 +82,7 @@
       </li>
     </ul>
   </div>
+  <!--End sidebar-wrapper-->
 
   <header class="topbar-nav">
     <nav class="navbar navbar-expand fixed-top">
@@ -226,5 +247,61 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%); color: white; border-radius: 15px;">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+        <h5 class="modal-title" id="logoutModalLabel" style="color: #00c9ff;">
+          <i class="fa fa-question-circle mr-2"></i>Confirm Logout
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="fa fa-sign-out-alt fa-3x mb-3" style="color: #00c9ff;"></i>
+        <h4>Are you sure you want to logout?</h4>
+        <p>You will need to login again to access the system.</p>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.2);">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+          <i class="fa fa-times mr-2"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="confirmLogout" style="background: linear-gradient(45deg, #00c9ff, #92fe9d); border: none;">
+          <i class="fa fa-sign-out-alt mr-2"></i>Yes, Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Logout confirmation functionality
+$(document).ready(function() {
+    // Intercept logout link click
+    $('a[href="${pageContext.request.contextPath}/Auth/index.jsp"]').on('click', function(e) {
+        e.preventDefault(); // Prevent default link behavior
+        $('#logoutModal').modal('show'); // Show confirmation modal
+    });
+    
+    // Handle confirm logout button click
+    $('#confirmLogout').on('click', function() {
+        // Redirect to logout page after confirmation
+        window.location.href = '${pageContext.request.contextPath}/Auth/index.jsp';
+    });
+    
+    // Optional: Add keyboard support (ESC to close, Enter to confirm)
+    $('#logoutModal').on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            $(this).modal('hide');
+        } else if (e.key === 'Enter' && $(this).hasClass('show')) {
+            $('#confirmLogout').click();
+        }
+    });
+});
+</script>
+
 </body>
 </html>

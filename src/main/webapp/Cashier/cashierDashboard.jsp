@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="model.User" %>
+<%@ page import="dao.ProductDAO" %>
+<%@ page import="dao.CustomerDAO" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +23,266 @@
   <link href="${pageContext.request.contextPath}/assets/css/sidebar-menu.css" rel="stylesheet"/>
   <link href="${pageContext.request.contextPath}/assets/css/app-style.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Custom chart styles */
+    .chart-container-1 {
+      position: relative;
+      height: 400px;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Ensure all chart text is clearly visible */
+    .chartjs-render-monitor text {
+      fill: #ffffff !important;
+      font-weight: 500;
+    }
+    
+    .card-header h5 {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    /* Help Section Styles - Theme Matching */
+    .help-section {
+      background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .help-card {
+      transition: all 0.3s ease;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .help-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .help-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #00c9ff;
+      text-shadow: 0 0 15px rgba(0, 201, 255, 0.5);
+    }
+    
+    .help-card h5 {
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    .help-card p {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 20px;
+    }
+    
+    .help-card .btn {
+      background: linear-gradient(45deg, #00c9ff, #92fe9d);
+      border: none;
+      border-radius: 25px;
+      padding: 10px 25px;
+      font-weight: 600;
+      color: #2c3e50;
+      transition: all 0.3s ease;
+    }
+    
+    .help-card .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 201, 255, 0.4);
+    }
+    
+    .help-modal .modal-content {
+      border-radius: 20px;
+      background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .help-modal .modal-header {
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+    }
+    
+    .help-modal .modal-title {
+      color: #00c9ff;
+      font-weight: 600;
+    }
+    
+    .help-modal .close {
+      color: white;
+      text-shadow: none;
+      opacity: 0.8;
+    }
+    
+    .help-modal .close:hover {
+      opacity: 1;
+      color: #00c9ff;
+    }
+    
+    .help-modal .modal-body {
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .help-modal .modal-footer {
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0 0 20px 20px;
+      padding: 20px;
+    }
+    
+    .help-modal .btn-primary {
+      background: linear-gradient(45deg, #00c9ff, #92fe9d);
+      border: none;
+      border-radius: 25px;
+      padding: 10px 25px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .help-modal .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 10px 25px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    /* Quick Links Styles */
+    .quick-links-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .quick-links-card .card-header {
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: #00c9ff;
+      font-weight: 600;
+    }
+    
+    .quick-link-item {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+    
+    .quick-link-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .quick-link-item i {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #00c9ff, #92fe9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .quick-link-item p {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+      font-weight: 500;
+    }
+    
+    /* Accordion Styles */
+    .accordion .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+    
+    .accordion .card-header {
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .accordion .btn-link {
+      color: #00c9ff;
+      text-decoration: none;
+      font-weight: 600;
+      width: 100%;
+      text-align: left;
+    }
+    
+    .accordion .btn-link:hover {
+      color: #92fe9d;
+    }
+    
+    .accordion .card-body {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* List Group Styles */
+    .list-group-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .list-group-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+    
+    /* Form Styles */
+    .form-control {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 8px;
+    }
+    
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #00c9ff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 201, 255, 0.25);
+      color: white;
+    }
+    
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Support Options */
+    .support-options p {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 10px;
+    }
+    
+    .support-options i {
+      color: #00c9ff;
+      width: 20px;
+      margin-right: 10px;
+    }
+  </style>
 </head>
 
 <body class="bg-theme bg-theme1">
@@ -69,7 +331,13 @@
 	  </a>
 	</li>
 	
-	
+	<!-- Help Section Menu Item -->
+	<li class="sidebar-header">SUPPORT</li>
+	<li>
+	  <a href="#" id="helpMenuLink">
+	    <i class="zmdi zmdi-help" style="color: #00c9ff;"></i> <span style="color: #00c9ff;">Help & Support</span>
+	  </a>
+	</li>
 
       <li class="sidebar-header">SETTINGS</li>
       <li>
@@ -138,6 +406,13 @@
             </li>
           </ul>
         </li>
+        
+        <!-- Help Button in Top Navigation -->
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="topHelpBtn" title="Help" style="color: #00c9ff;">
+            <i class="fa fa-question-circle fa-lg"></i>
+          </a>
+        </li>
       </ul>
     </nav>
   </header>
@@ -151,37 +426,167 @@
       <div class="card mt-3">
         <div class="card-content">
           <div class="row row-group m-0">
-            <div class="col-12 col-lg-6 col-xl-6 border-light">
+            <%
+              // Get counts from DAOs
+              ProductDAO productDAO = new ProductDAO();
+              CustomerDAO customerDAO = new CustomerDAO();
+              
+              int totalProducts = productDAO.getTotalProductsCount();
+              int lowStockProducts = productDAO.getLowStockProductsCount();
+              int outOfStockProducts = productDAO.getOutOfStockProductsCount();
+              int totalCustomers = customerDAO.getAllCustomers().size();
+            %>
+            
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
               <div class="card-body">
-                <h5 class="text-white mb-0">Welcome <span class="float-right"><i class="fa fa-user"></i></span></h5>
+                <h5 class="text-white mb-0"><%= totalProducts %> <span class="float-right"><i class="fa fa-cubes"></i></span></h5>
                 <div class="progress my-3" style="height:3px;">
                   <div class="progress-bar" style="width:55%"></div>
                 </div>
-                <p class="mb-0 text-white small-font">
-                  <%
-                    if (user != null) {
-                      out.print(user.getUsername() + " (" + user.getRole() + ")");
-                    }
-                  %>
-                  <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span>
-                </p>
+                <p class="mb-0 text-white small-font">Total Products <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
               </div>
             </div>
-            <div class="col-12 col-lg-6 col-xl-6 border-light">
+            
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
               <div class="card-body">
-                <h5 class="text-white mb-0">Quick Actions <span class="float-right"><i class="fa fa-bolt"></i></span></h5>
+                <h5 class="text-white mb-0"><%= lowStockProducts %> <span class="float-right"><i class="fa fa-exclamation-triangle"></i></span></h5>
                 <div class="progress my-3" style="height:3px;">
                   <div class="progress-bar" style="width:55%"></div>
                 </div>
-                <p class="mb-0 text-white small-font">
-                  <a href="${pageContext.request.contextPath}/CustomerServlet?action=list" class="text-white">Manage Customers</a>
-                  <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span>
-                </p>
+                <p class="mb-0 text-white small-font">Low Stock Items <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+              </div>
+            </div>
+            
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0"><%= outOfStockProducts %> <span class="float-right"><i class="fa fa-times-circle"></i></span></h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">Out of Stock <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
+              </div>
+            </div>
+            
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+              <div class="card-body">
+                <h5 class="text-white mb-0"><%= totalCustomers %> <span class="float-right"><i class="fa fa-users"></i></span></h5>
+                <div class="progress my-3" style="height:3px;">
+                  <div class="progress-bar" style="width:55%"></div>
+                </div>
+                <p class="mb-0 text-white small-font">Total Customers <span class="float-right"><i class="zmdi zmdi-long-arrow-up"></i></span></p>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <!-- Help Section -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card help-section">
+            <div class="card-header" style="background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <h5 style="color: #00c9ff; font-weight: 700; margin: 0;">
+                <i class="fa fa-question-circle mr-2"></i>Help & Support Center
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-4">
+                  <div class="card help-card text-center">
+                    <div class="card-body">
+                      <div class="help-icon">
+                        <i class="fa fa-book"></i>
+                      </div>
+                      <h5>User Guide</h5>
+                      <p>Complete documentation for all system features</p>
+                      <button class="btn btn-outline-primary" data-toggle="modal" data-target="#userGuideModal">
+                        View Guide
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                  <div class="card help-card text-center">
+                    <div class="card-body">
+                      <div class="help-icon">
+                        <i class="fa fa-video"></i>
+                      </div>
+                      <h5>Video Tutorials</h5>
+                      <p>Step-by-step video guides for common tasks</p>
+                      <button class="btn btn-outline-primary" data-toggle="modal" data-target="#videoTutorialsModal">
+                        Watch Videos
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                  <div class="card help-card text-center">
+                    <div class="card-body">
+                      <div class="help-icon">
+                        <i class="fa fa-headset"></i>
+                      </div>
+                      <h5>Contact Support</h5>
+                      <p>Get help from our technical support team</p>
+                      <button class="btn btn-outline-primary" data-toggle="modal" data-target="#contactSupportModal">
+                        Contact Us
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mt-4">
+                <div class="col-12">
+                  <div class="card quick-links-card">
+                    <div class="card-header">
+                      <h6 style="color: #00c9ff; margin: 0;">Quick Links</h6>
+                    </div>
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-3 col-6 text-center mb-3">
+                          <a href="${pageContext.request.contextPath}/CashierCategoryServlet?action=list" class="text-decoration-none">
+                            <div class="quick-link-item">
+                              <i class="fa fa-list-alt"></i>
+                              <p>Category Management</p>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="col-md-3 col-6 text-center mb-3">
+                          <a href="${pageContext.request.contextPath}/CashierProductServlet?action=list" class="text-decoration-none">
+                            <div class="quick-link-item">
+                              <i class="fa fa-cube"></i>
+                              <p>Product Management</p>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="col-md-3 col-6 text-center mb-3">
+                          <a href="${pageContext.request.contextPath}/CashierInvoiceServlet?action=new" class="text-decoration-none">
+                            <div class="quick-link-item">
+                              <i class="fa fa-cash-register"></i>
+                              <p>Cashier System</p>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="col-md-3 col-6 text-center mb-3">
+                          <a href="${pageContext.request.contextPath}/CashierCustomerServlet?action=list" class="text-decoration-none">
+                            <div class="quick-link-item">
+                              <i class="fa fa-users"></i>
+                              <p>Customer Management</p>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--End Help Section-->
       
       <!--End Dashboard Content-->
       
@@ -213,5 +618,228 @@
   <script src="${pageContext.request.contextPath}/assets/plugins/simplebar/js/simplebar.js"></script>
   <script src="${pageContext.request.contextPath}/assets/js/sidebar-menu.js"></script>
   <script src="${pageContext.request.contextPath}/assets/js/app-script.js"></script>
+  
+  <!-- Help Section Modals -->
+  <!-- User Guide Modal -->
+  <div class="modal fade help-modal" id="userGuideModal" tabindex="-1" role="dialog" aria-labelledby="userGuideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userGuideModalLabel"><i class="fa fa-book mr-2"></i>Cashier User Guide</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="accordion" id="userGuideAccordion">
+            <div class="card">
+              <div class="card-header" id="headingOne">
+                <h6 class="mb-0">
+                  <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <i class="fa fa-cash-register mr-2"></i>Processing Sales
+                  </button>
+                </h6>
+              </div>
+              <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#userGuideAccordion">
+                <div class="card-body">
+                  <p>To process a sale:</p>
+                  <ol>
+                    <li>Navigate to the <strong>Cashier</strong> section</li>
+                    <li>Select or search for a customer</li>
+                    <li>Add products to the cart</li>
+                    <li>Process payment and complete the sale</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header" id="headingTwo">
+                <h6 class="mb-0">
+                  <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <i class="fa fa-users mr-2"></i>Customer Management
+                  </button>
+                </h6>
+              </div>
+              <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#userGuideAccordion">
+                <div class="card-body">
+                  <p>To manage customers:</p>
+                  <ol>
+                    <li>Go to <strong>Manage Customers</strong></li>
+                    <li>Add new customers with their details</li>
+                    <li>Search for existing customers</li>
+                    <li>Edit customer information as needed</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Tutorials Modal -->
+  <div class="modal fade help-modal" id="videoTutorialsModal" tabindex="-1" role="dialog" aria-labelledby="videoTutorialsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="videoTutorialsModalLabel"><i class="fa fa-video mr-2"></i>Video Tutorials</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Cashier Basics</h6>
+                <small>12:45</small>
+              </div>
+              <p class="mb-1">Learn how to process sales and manage transactions</p>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Customer Management</h6>
+                <small>08:22</small>
+              </div>
+              <p class="mb-1">How to add and manage customer information</p>
+            </a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Support Modal -->
+  <div class="modal fade help-modal" id="contactSupportModal" tabindex="-1" role="dialog" aria-labelledby="contactSupportModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="contactSupportModalLabel"><i class="fa fa-headset mr-2"></i>Contact Support</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="supportForm">
+            <div class="form-group">
+              <label for="supportName" style="color: rgba(255, 255, 255, 0.9);">Your Name</label>
+              <input type="text" class="form-control" id="supportName" required>
+            </div>
+            <div class="form-group">
+              <label for="supportEmail" style="color: rgba(255, 255, 255, 0.9);">Email Address</label>
+              <input type="email" class="form-control" id="supportEmail" required>
+            </div>
+            <div class="form-group">
+              <label for="supportSubject" style="color: rgba(255, 255, 255, 0.9);">Subject</label>
+              <select class="form-control" id="supportSubject" required>
+                <option value="">Select a subject</option>
+                <option value="technical">Technical Issue</option>
+                <option value="billing">Billing Inquiry</option>
+                <option value="feature">Feature Request</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="supportMessage" style="color: rgba(255, 255, 255, 0.9);">Message</label>
+              <textarea class="form-control" id="supportMessage" rows="4" required></textarea>
+            </div>
+          </form>
+          <div class="mt-4 support-options">
+            <h6 style="color: #00c9ff;">Other Support Options:</h6>
+            <p><i class="fa fa-envelope"></i>Email: support@pahana.edu</p>
+            <p><i class="fa fa-phone"></i>Phone: +94 11 234 5678</p>
+            <p><i class="fa fa-clock"></i>Hours: Monday-Friday, 8:00 AM - 6:00 PM</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="submitSupportRequest">Submit Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%); color: white; border-radius: 15px;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+          <h5 class="modal-title" id="logoutModalLabel" style="color: #00c9ff;">
+            <i class="fa fa-question-circle mr-2"></i>Confirm Logout
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa fa-sign-out-alt fa-3x mb-3" style="color: #00c9ff;"></i>
+          <h4>Are you sure you want to logout?</h4>
+          <p>You will need to login again to access the system.</p>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.2);">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+            <i class="fa fa-times mr-2"></i>Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="confirmLogout" style="background: linear-gradient(45deg, #00c9ff, #92fe9d); border: none;">
+            <i class="fa fa-sign-out-alt mr-2"></i>Yes, Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // Help section functionality
+  $(document).ready(function() {
+      $('#helpMenuLink, #topHelpBtn').click(function(e) {
+          e.preventDefault();
+          $('html, body').animate({
+              scrollTop: $('.help-section').offset().top - 20
+          }, 1000);
+      });
+      
+      // Support form submission
+      $('#submitSupportRequest').click(function() {
+          const form = $('#supportForm');
+          if (form[0].checkValidity()) {
+              // Simulate form submission
+              $('#contactSupportModal').modal('hide');
+              alert('Your support request has been submitted successfully. We will contact you within 24 hours.');
+              form[0].reset();
+          } else {
+              form[0].reportValidity();
+          }
+      });
+      
+      // Logout confirmation functionality
+      $('a[href="${pageContext.request.contextPath}/Auth/index.jsp"]').on('click', function(e) {
+          e.preventDefault(); // Prevent default link behavior
+          $('#logoutModal').modal('show'); // Show confirmation modal
+      });
+      
+      // Handle confirm logout button click
+      $('#confirmLogout').on('click', function() {
+          // Redirect to logout page after confirmation
+          window.location.href = '${pageContext.request.contextPath}/Auth/index.jsp';
+      });
+      
+      // Optional: Add keyboard support (ESC to close, Enter to confirm)
+      $('#logoutModal').on('keydown', function(e) {
+          if (e.key === 'Escape') {
+              $(this).modal('hide');
+          } else if (e.key === 'Enter' && $(this).hasClass('show')) {
+              $('#confirmLogout').click();
+          }
+      });
+  });
+  </script>
+  
 </body>
 </html>
