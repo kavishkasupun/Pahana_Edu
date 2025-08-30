@@ -620,65 +620,472 @@
   
   <!-- Help Section Modals -->
   <!-- User Guide Modal -->
-  <div class="modal fade help-modal" id="userGuideModal" tabindex="-1" role="dialog" aria-labelledby="userGuideModalLabel" aria-hidden="true">
+<div class="modal fade help-modal" id="userGuideModal" tabindex="-1" role="dialog" aria-labelledby="userGuideModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="userGuideModalLabel"><i class="fa fa-book mr-2"></i>Cashier User Guide</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="accordion" id="userGuideAccordion">
-            <div class="card">
-              <div class="card-header" id="headingOne">
-                <h6 class="mb-0">
-                  <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    <i class="fa fa-cash-register mr-2"></i>Processing Sales
-                  </button>
-                </h6>
-              </div>
-              <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#userGuideAccordion">
-                <div class="card-body">
-                  <p>To process a sale:</p>
-                  <ol>
-                    <li>Navigate to the <strong>Cashier</strong> section</li>
-                    <li>Select or search for a customer</li>
-                    <li>Add products to the cart</li>
-                    <li>Process payment and complete the sale</li>
-                  </ol>
-                </div>
-              </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userGuideModalLabel"><i class="fa fa-book mr-2"></i>Complete User Guide</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="card">
-              <div class="card-header" id="headingTwo">
-                <h6 class="mb-0">
-                  <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    <i class="fa fa-users mr-2"></i>Customer Management
-                  </button>
-                </h6>
-              </div>
-              <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#userGuideAccordion">
-                <div class="card-body">
-                  <p>To manage customers:</p>
-                  <ol>
-                    <li>Go to <strong>Manage Customers</strong></li>
-                    <li>Add new customers with their details</li>
-                    <li>Search for existing customers</li>
-                    <li>Edit customer information as needed</li>
-                  </ol>
+            <div class="modal-body">
+                <div class="accordion" id="userGuideAccordion">
+                    
+                    <!-- Dashboard Overview -->
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    <i class="fa fa-dashboard mr-2"></i>Dashboard Overview
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <p>The dashboard provides a comprehensive overview of your store's performance with key metrics:</p>
+                                <ul>
+                                    <li><strong>Total Products:</strong> Number of products in your inventory</li>
+                                    <li><strong>Low Stock Items:</strong> Products with limited stock (5 or fewer items)</li>
+                                    <li><strong>Out of Stock:</strong> Products that need restocking</li>
+                                    <li><strong>Total Sales:</strong> Revenue generated from all transactions</li>
+                                </ul>
+                                <p><strong>Recent Sales Chart:</strong> Visual representation of daily sales performance</p>
+                                <p><strong>Recent Sales Table:</strong> Detailed list of recent transactions</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Category Management -->
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    <i class="fa fa-list-alt mr-2"></i>Category Management
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Adding a New Category:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Categories</strong> from the sidebar menu</li>
+                                    <li>Click the <strong>Add New</strong> button</li>
+                                    <li>Fill in the category name (required)</li>
+                                    <li>Add a description (optional)</li>
+                                    <li>Click <strong>Save</strong> to create the category</li>
+                                </ol>
+                                
+                                <h6>Editing a Category:</h6>
+                                <ol>
+                                    <li>Go to the Categories list</li>
+                                    <li>Click the <strong>Edit</strong> button (pencil icon) next to the category</li>
+                                    <li>Modify the category name or description</li>
+                                    <li>Click <strong>Save</strong> to update</li>
+                                </ol>
+                                
+                                <h6>Deleting a Category:</h6>
+                                <ol>
+                                    <li>Go to the Categories list</li>
+                                    <li>Click the <strong>Delete</strong> button (trash icon) next to the category</li>
+                                    <li>Confirm the deletion when prompted</li>
+                                    <li class="text-warning"><strong>Note:</strong> Categories with associated products cannot be deleted</li>
+                                </ol>
+                                
+                                <h6>Best Practices:</h6>
+                                <ul>
+                                    <li>Create categories before adding products</li>
+                                    <li>Use descriptive category names</li>
+                                    <li>Keep categories organized for easy navigation</li>
+                                    <li>Regularly review and update categories</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Management -->
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    <i class="fa fa-cube mr-2"></i>Product Management
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Adding a New Product:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Products</strong> from the sidebar menu</li>
+                                    <li>Click the <strong>Add New</strong> button</li>
+                                    <li>Fill in the product details:
+                                        <ul>
+                                            <li><strong>Product Name:</strong> Required field</li>
+                                            <li><strong>Category:</strong> Select from existing categories</li>
+                                            <li><strong>Description:</strong> Product details and specifications</li>
+                                            <li><strong>Price:</strong> Selling price in Rs.</li>
+                                            <li><strong>Quantity:</strong> Initial stock quantity</li>
+                                            <li><strong>Image:</strong> Upload product photo (optional)</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click <strong>Save</strong> to add the product</li>
+                                </ol>
+                                
+                                <h6>Editing a Product:</h6>
+                                <ol>
+                                    <li>Go to the Products list</li>
+                                    <li>Click the <strong>Edit</strong> button next to the product</li>
+                                    <li>Update the product information</li>
+                                    <li>Click <strong>Save</strong> to apply changes</li>
+                                </ol>
+                                
+                                <h6>Managing Stock:</h6>
+                                <ul>
+                                    <li><span class="badge badge-warning">Low Stock</span> indicates products with 5 or fewer items</li>
+                                    <li><span class="badge badge-danger">Out of Stock</span> indicates products with zero quantity</li>
+                                    <li>Regularly update stock levels to avoid overselling</li>
+                                </ul>
+                                
+                                <h6>Product Images:</h6>
+                                <ul>
+                                    <li>Supported formats: JPEG, PNG</li>
+                                    <li>Maximum file size: 10MB</li>
+                                    <li>Recommended dimensions: 500x500 pixels</li>
+                                    <li>Images display in product lists and cashier system</li>
+                                </ul>
+                                
+                                <h6>Low Stock View:</h6>
+                                <p>Use the <strong>Low Stock</strong> button to quickly identify products that need restocking.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Management -->
+                    <div class="card">
+                        <div class="card-header" id="headingFour">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    <i class="fa fa-users mr-2"></i>Customer Management
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Adding a New Customer:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Accounts → Customer Management</strong></li>
+                                    <li>Click the <strong>Add New</strong> button</li>
+                                    <li>Fill in customer details:
+                                        <ul>
+                                            <li><strong>Account Number:</strong> Unique identifier for the customer</li>
+                                            <li><strong>Name:</strong> Customer's full name</li>
+                                            <li><strong>Email:</strong> Contact email address</li>
+                                            <li><strong>Telephone:</strong> Phone number</li>
+                                            <li><strong>Address:</strong> Complete mailing address</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click <strong>Save</strong> to add the customer</li>
+                                </ol>
+                                
+                                <h6>Editing Customer Information:</h6>
+                                <ol>
+                                    <li>Go to the Customers list</li>
+                                    <li>Click the <strong>Edit</strong> button next to the customer</li>
+                                    <li>Update the customer information</li>
+                                    <li>Click <strong>Save</strong> to apply changes</li>
+                                </ol>
+                                
+                                <h6>Customer Search in Cashier:</h6>
+                                <ul>
+                                    <li>Customers can be searched by name or account number</li>
+                                    <li>Selecting a customer pre-fills their information for sales</li>
+                                    <li>Email receipts can be sent to customers after purchase</li>
+                                </ul>
+                                
+                                <h6>Best Practices:</h6>
+                                <ul>
+                                    <li>Maintain accurate customer information</li>
+                                    <li>Use unique account numbers for each customer</li>
+                                    <li>Keep customer records updated regularly</li>
+                                    <li>Use customer data for personalized service</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Staff Management -->
+                    <div class="card">
+                        <div class="card-header" id="headingFive">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    <i class="fa fa-user-tie mr-2"></i>Staff Management
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Adding Staff Members:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Accounts → Staff Management</strong></li>
+                                    <li>Click the <strong>Add New</strong> button</li>
+                                    <li>Fill in staff details:
+                                        <ul>
+                                            <li><strong>Username:</strong> Login username (required)</li>
+                                            <li><strong>Email:</strong> Professional email address (required)</li>
+                                            <li><strong>Password:</strong> Secure password for system access</li>
+                                            <li><strong>Role:</strong> Select between Admin or Cashier</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click <strong>Save</strong> to create the staff account</li>
+                                </ol>
+                                
+                                <h6>Role Permissions:</h6>
+                                <ul>
+                                    <li><strong>Admin:</strong> Full access to all system features
+                                        <ul>
+                                            <li>Dashboard viewing</li>
+                                            <li>Category management</li>
+                                            <li>Product management</li>
+                                            <li>Customer management</li>
+                                            <li>Staff management</li>
+                                            <li>Sales processing</li>
+                                            <li>Report generation</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Cashier:</strong> Limited access for sales processing
+                                        <ul>
+                                            <li>Dashboard viewing (limited)</li>
+                                            <li>Sales processing only</li>
+                                            <li>Customer lookup</li>
+                                            <li>No access to management features</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                
+                                <h6>Security Best Practices:</h6>
+                                <ul>
+                                    <li>Use strong, unique passwords</li>
+                                    <li>Assign appropriate role permissions</li>
+                                    <li>Regularly review staff access levels</li>
+                                    <li>Deactivate accounts for former employees</li>
+                                </ul>
+                                
+                                <h6>Deleting Staff Accounts:</h6>
+                                <ol>
+                                    <li>Go to the Staff Management list</li>
+                                    <li>Click the <strong>Delete</strong> button next to the staff member</li>
+                                    <li>Confirm the deletion when prompted</li>
+                                    <li class="text-warning"><strong>Note:</strong> This action cannot be undone</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cashier System -->
+                    <div class="card">
+                        <div class="card-header" id="headingSix">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    <i class="fa fa-cash-register mr-2"></i>Cashier System
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Processing a Sale:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Cashier</strong> from the sidebar menu</li>
+                                    <li><strong>Step 1: Customer Selection</strong>
+                                        <ul>
+                                            <li>Search for existing customers by name or account number</li>
+                                            <li>Select the customer from search results</li>
+                                            <li>Customer information will auto-populate</li>
+                                            <li>Use <strong>Clear Customer</strong> to start over</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Step 2: Adding Products</strong>
+                                        <ul>
+                                            <li>Search products by name or use category filters</li>
+                                            <li>Click on products to add them to the cart</li>
+                                            <li>Use quantity controls to adjust amounts</li>
+                                            <li>Remove items using the trash icon</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Step 3: Payment Processing</strong>
+                                        <ul>
+                                            <li>Review the order summary with subtotal</li>
+                                            <li>Enter the amount paid by customer</li>
+                                            <li>System automatically calculates balance</li>
+                                            <li>Click <strong>Complete Sale</strong> to finalize</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Step 4: Receipt Generation</strong>
+                                        <ul>
+                                            <li>System generates invoice automatically</li>
+                                            <li>Email receipt is sent to customer if email is provided</li>
+                                            <li>Use <strong>Print Receipt</strong> for physical copy</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                                
+                                <h6>Cart Management:</h6>
+                                <ul>
+                                    <li>View all items in the cart with quantities and prices</li>
+                                    <li>Adjust quantities using + and - buttons</li>
+                                    <li>Remove items completely with delete button</li>
+                                    <li>Cart automatically calculates totals</li>
+                                </ul>
+                                
+                                <h6>Stock Validation:</h6>
+                                <ul>
+                                    <li>System prevents adding out-of-stock products</li>
+                                    <li>Low stock warnings appear for limited quantities</li>
+                                    <li>Real-time inventory updates during sales</li>
+                                </ul>
+                                
+                                <h6>Keyboard Shortcuts:</h6>
+                                <ul>
+                                    <li><strong>Enter:</strong> Initiate search in customer or product fields</li>
+                                    <li><strong>Tab:</strong> Navigate between form fields</li>
+                                    <li><strong>Escape:</strong> Clear current selection</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sales Reports -->
+                    <div class="card">
+                        <div class="card-header" id="headingSeven">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                    <i class="fa fa-chart-bar mr-2"></i>Sales Reports & Analytics
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>Generating Sales Reports:</h6>
+                                <ol>
+                                    <li>Navigate to <strong>Sales Report</strong> from the sidebar menu</li>
+                                    <li>Select date range using the calendar pickers
+                                        <ul>
+                                            <li><strong>Start Date:</strong> Beginning of report period</li>
+                                            <li><strong>End Date:</strong> End of report period</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click <strong>Filter</strong> to generate the report</li>
+                                    <li>Use <strong>Export to Excel</strong> for data analysis</li>
+                                </ol>
+                                
+                                <h6>Report Components:</h6>
+                                <ul>
+                                    <li><strong>Daily Sales Chart:</strong> Visual representation of sales trends</li>
+                                    <li><strong>Sales Details Table:</strong> Comprehensive list of all transactions</li>
+                                    <li><strong>Invoice Information:</strong> Invoice ID, date, customer details</li>
+                                    <li><strong>Transaction Details:</strong> Items purchased and total amounts</li>
+                                </ul>
+                                
+                                <h6>Data Analysis:</h6>
+                                <ul>
+                                    <li>Identify best-selling products</li>
+                                    <li>Track sales trends over time</li>
+                                    <li>Analyze customer purchasing patterns</li>
+                                    <li>Monitor daily revenue performance</li>
+                                </ul>
+                                
+                                <h6>Export Features:</h6>
+                                <ul>
+                                    <li>Export reports to Excel for further analysis</li>
+                                    <li>Data includes all transaction details</li>
+                                    <li>Use exported data for accounting purposes</li>
+                                    <li>Create custom reports using exported data</li>
+                                </ul>
+                                
+                                <h6>Viewing Invoice Details:</h6>
+                                <ol>
+                                    <li>From the sales report, click <strong>View</strong> next to any invoice</li>
+                                    <li>System displays complete invoice details</li>
+                                    <li>View individual items, quantities, and prices</li>
+                                    <li>See customer information and payment details</li>
+                                </ol>
+                                
+                                <h6>Reprinting Receipts:</h6>
+                                <ol>
+                                    <li>From the sales report, click <strong>Print</strong> next to any invoice</li>
+                                    <li>System generates a printable receipt</li>
+                                    <li>Receipt includes all transaction details</li>
+                                    <li>Use for customer copies or record keeping</li>
+                                </ol>
+                                
+                                <h6>Report Best Practices:</h6>
+                                <ul>
+                                    <li>Generate daily reports for performance tracking</li>
+                                    <li>Create weekly and monthly reports for trends</li>
+                                    <li>Export data regularly for backup purposes</li>
+                                    <li>Use reports for inventory planning</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Settings -->
+                    <div class="card">
+                        <div class="card-header" id="headingEight">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                                    <i class="fa fa-cog mr-2"></i>System Settings & Maintenance
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#userGuideAccordion">
+                            <div class="card-body">
+                                <h6>User Management:</h6>
+                                <ul>
+                                    <li>Regularly review staff accounts and permissions</li>
+                                    <li>Update passwords periodically for security</li>
+                                    <li>Deactivate accounts for former employees</li>
+                                </ul>
+                                
+                                <h6>Data Backup:</h6>
+                                <ul>
+                                    <li>Regularly export important data</li>
+                                    <li>Maintain backup copies of sales reports</li>
+                                    <li>Keep customer and product data backed up</li>
+                                </ul>
+                                
+                                <h6>System Maintenance:</h6>
+                                <ul>
+                                    <li>Regularly update product information</li>
+                                    <li>Maintain accurate inventory levels</li>
+                                    <li>Keep customer records current</li>
+                                    <li>Review and purge old data as needed</li>
+                                </ul>
+                                
+                                <h6>Security Practices:</h6>
+                                <ul>
+                                    <li>Use strong passwords for all accounts</li>
+                                    <li>Limit admin access to authorized personnel only</li>
+                                    <li>Regularly review system access logs</li>
+                                    <li>Keep the system updated with latest security patches</li>
+                                </ul>
+                                
+                                <h6>Getting Help:</h6>
+                                <ul>
+                                    <li>Use the <strong>Help & Support Center</strong> for assistance</li>
+                                    <li>Contact support for technical issues</li>
+                                    <li>Refer to video tutorials for visual guidance</li>
+                                    <li>Access quick links for common tasks</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
-              </div>
             </div>
-          </div>
+            
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
   <!-- Video Tutorials Modal -->
   <div class="modal fade help-modal" id="videoTutorialsModal" tabindex="-1" role="dialog" aria-labelledby="videoTutorialsModalLabel" aria-hidden="true">
